@@ -1,0 +1,43 @@
+repos:
+  - repo: local
+    hooks:
+      - id: format
+        name: "Ruff Format"
+        entry: uv --directory app run ruff format
+        language: system
+        types: [python]
+        files: ^app/.*\.py$
+        pass_filenames: false
+        stages: [pre-commit]
+
+      - id: lint
+        name: "Ruff Lint"
+        entry: uv --directory app run ruff check --fix
+        language: system
+        types: [python]
+        files: ^app/.*\.py$
+        pass_filenames: false
+        stages: [pre-commit]
+
+      - id: type-check
+        name: "Type Checking (ty)"
+        entry: uv --directory app run ty
+        language: system
+        types: [python]
+        files: ^app/.*\.py$
+        pass_filenames: false
+        stages: [pre-push]
+
+      - id: bruin-format
+        name: "Bruin Format sql files & asset definitions"
+        entry: bruin format app/ --sqlfluff
+        language: system
+        pass_filenames: false
+        stages: [pre-commit]
+
+      - id: bruin-validate
+        name: "Bruin Validate"
+        entry: bruin validate app/
+        language: system
+        pass_filenames: false
+        stages: [pre-commit]

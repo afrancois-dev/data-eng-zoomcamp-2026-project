@@ -1,0 +1,57 @@
+[project]
+name = "mma-stats"
+version = "0.1.0"
+description = "MMA stats"
+readme = "README.md"
+requires-python = ">=3.13,<3.14"
+
+dependencies = [
+    "pandas>=3.0.1<3.1.0",
+    "requests>=2.33.0,<3.0.0",
+    "beautifulsoup4>=4.14.3,<4.15.0",
+]
+
+[dependency-groups]
+
+ci = [
+    "ruff>=0.15.8,<0.16.0", # formating and linting
+    "yamllint>=1.38.0,<1.39.0", # yaml linting
+    "ty>=0.0.26,<0.0.27" # type checking
+    ]
+
+dev = [
+    {include-group = "ci"},
+    "prek",
+    "jupyter",
+]
+
+[tool.uv]
+default-groups = ["ci"]
+
+[tool.ruff]
+line-length = 130
+
+[lint]
+# Enable Pyflakes (`F`) and a subset of the pycodestyle (`E`) codes by default.
+select = ["E4", "E7", "E9", "F"]
+ignore = []
+
+# Allow fix for all enabled rules (when `--fix`) is provided.
+fixable = ["ALL"]
+unfixable = []
+
+# Allow unused variables when underscore-prefixed.
+dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
+
+[format]
+# Like Black, use double quotes for strings.
+quote-style = "double"
+
+# Like Black, indent with spaces, rather than tabs.
+indent-style = "space"
+
+# Like Black, respect magic trailing commas.
+skip-magic-trailing-comma = false
+
+# Like Black, automatically detect the appropriate line ending.
+line-ending = "auto"
