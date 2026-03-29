@@ -59,3 +59,6 @@ install pre-commit
 ```
 uv --directory app run prek install
 ```
+
+## NB
+- I stored raw/ data on bigquery because the price is the same as gcs

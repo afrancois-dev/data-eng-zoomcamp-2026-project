@@ -209,3 +209,7 @@ __marimo__/
 # bruin
 .bruin.yml
 TODO
+logs/runs
+logs/*.log
+*.py[cod]
+logs/queries

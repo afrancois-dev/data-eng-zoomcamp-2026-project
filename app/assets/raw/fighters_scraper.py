@@ -1,19 +1,18 @@
 """@bruin
 
-name: mma.fighters_scraper
-connection: duckdb-default
+name: raw.fighters
+type: duckdb.sql
 
 materialization:
   type: table
   strategy: create+replace
-image: python:3.13-slim
 
 columns:
-  - name: FirstName
+  - name: first_name
     type: string
-  - name: LastName
+  - name: last_name
     type: string
-  - name: Wins
+  - name: wins
     type: integer
 
 @bruin"""
@@ -24,7 +23,7 @@ import pandas as pd
 import string
 
 
-def scrape_fighters(char):
+def scrape_fighters(char: str):
     url = f"http://ufcstats.com/statistics/fighters?char={char}&page=all"
     response = requests.get(url, timeout=10)
     response.raise_for_status()
@@ -40,21 +39,21 @@ def scrape_fighters(char):
 
         data.append(
             {
-                "FirstName": cells[0].text.strip(),
-                "LastName": cells[1].text.strip(),
-                "Nickname": cells[2].text.strip(),
-                "Height": cells[3].text.strip(),
-                "Weight": cells[4].text.strip(),
-                "Wins": int(cells[7].text.strip()) if cells[7].text.strip().isdigit() else 0,
+                "first_name": cells[0].text.strip(),
+                "last_name": cells[1].text.strip(),
+                "nick_name": cells[2].text.strip(),
+                "height": cells[3].text.strip(),
+                "weight": cells[4].text.strip(),
+                "wins": int(cells[7].text.strip()) if cells[7].text.strip().isdigit() else 0,
             }
         )
     return data
 
 
-def materialize():
+def materialize() -> pd.DataFrame:
     all_fighters = []
 
-    for char in string.ascii_lowercase:
+    for char in string.ascii_lowercase[0]:
         try:
             fighters = scrape_fighters(char)
             all_fighters.extend(fighters)
