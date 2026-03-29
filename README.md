@@ -60,5 +60,10 @@ install pre-commit
 uv --directory app run prek install
 ```
 
+## Debug commands
+```
+bruin query --connection "duckdb-dev" --query "SELECT * FROM staging.fighters LIMIT 10" --description "Checking the content of staging.fighters table"
+```
+
 ## NB
 - I stored raw/ data on bigquery because the price is the same as gcs

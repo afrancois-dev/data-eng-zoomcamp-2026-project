@@ -1,7 +1,7 @@
 """@bruin
 
 name: raw.fighters
-type: duckdb.sql
+connection: duckdb-dev
 
 materialization:
   type: table
@@ -44,7 +44,7 @@ def scrape_fighters(char: str):
                 "nick_name": cells[2].text.strip(),
                 "height": cells[3].text.strip(),
                 "weight": cells[4].text.strip(),
-                "wins": int(cells[7].text.strip()) if cells[7].text.strip().isdigit() else 0,
+                "wins": int(cells[7].text.strip()) if cells[7].text.strip().isdigit() else None,
             }
         )
     return data

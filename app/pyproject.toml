@@ -9,6 +9,7 @@ dependencies = [
     "pandas>=3.0.1<3.1.0",
     "requests>=2.33.0,<3.0.0",
     "beautifulsoup4>=4.14.3,<4.15.0",
+    "bruin-sdk[duckdb,bigquery]>=0.5.0,<0.6.0",
 ]
 
 [dependency-groups]

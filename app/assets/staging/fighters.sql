@@ -24,6 +24,12 @@ columns:
     type: VARCHAR
     checks:
       - name: not_null
+  - name: nick_name
+    type: VARCHAR
+  - name: height
+    type: VARCHAR
+  - name: weight
+    type: VARCHAR
   - name: wins
     type: BIGINT
     checks:
@@ -34,10 +40,8 @@ columns:
 
 WITH source AS (
     SELECT
-        first_name,
-        last_name,
-        wins,
-        COALESCE(first_name, last_name) AS id
+        *,
+        CONCAT(first_name, '_', last_name, '_', nick_name) AS id
     FROM raw.fighters
 )
 
