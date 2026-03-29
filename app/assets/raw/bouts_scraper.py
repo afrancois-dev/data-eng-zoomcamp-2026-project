@@ -64,7 +64,7 @@ def scrape_bouts_from_event(event_url):
         time_val = cells[9].text.strip()
         bout_url = row.get("data-link")
 
-        # winner detection
+        # winner detection -> gérer les draw
         win_tags = cells[0].select("i.b-flag__text")
         winner = None
         if win_tags:
