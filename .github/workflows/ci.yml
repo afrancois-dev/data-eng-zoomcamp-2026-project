@@ -1,10 +1,10 @@
 name: CI - Bruin Pipeline
 
-# trigger on push to main and staging branches, and on pull requests to staging
+# trigger on push to production and staging branches, and on pull requests to staging
 on:
   push:
     branches:
-      - main
+      - production
       - staging
   pull_request:
     branches:
@@ -13,14 +13,14 @@ on:
 
 env:
   REGION: europe-west1
-  ENVIRONMENT: "${{ github.ref_name == 'main' && 'production' || 'staging' }}"
-  PROJECT_ID: "mma-stats-${{ github.ref_name == 'main' && 'production' || 'staging' }}"
+  ENVIRONMENT: "${{ github.ref_name == 'production' && 'production' || 'staging' }}"
+  PROJECT_ID: "mma-stats-${{ github.ref_name == 'production' && 'production' || 'staging' }}"
   IMAGE: mma-stats
 
 jobs:
   validate-and-build:
     runs-on: ubuntu-latest
-    environment: ${{ github.ref_name == 'main' && 'production' || 'staging' }}
+    environment: ${{ github.ref_name == 'production' && 'production' || 'staging' }}
     permissions:
       contents: read
       id-token: write
@@ -46,42 +46,40 @@ jobs:
           password: ${{ steps.auth.outputs.access_token }}
 
       - name: Build Docker Image
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          push: false # we only push if validations pass
-          load: true
-          tags: ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.IMAGE }}:${{ github.sha }}
+        run: |
+          docker build -t ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.IMAGE }}/${{ env.IMAGE }}:${{ github.sha }} .
 
       # 2. validation inside docker (ruff, yaml, bruin)
       - name: Linting & Formatting Check (Ruff inside Docker)
         run: |
           docker run --rm \
-            ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.IMAGE }}:${{ github.sha }} \
-            --entrypoint ruff \
-            run ruff check .
+            --entrypoint /bin/sh \
+            ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.IMAGE }}/${{ env.IMAGE }}:${{ github.sha }} \
+            -c "uv run ruff check ."
 
       - name: Bruin Format & Validate (inside Docker)
         run: |
           docker run --rm \
-            ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.IMAGE }}:${{ github.sha }} \
-            format . --check
+            -v ${{ github.workspace }}:/app \
+            ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.IMAGE }}/${{ env.IMAGE }}:${{ github.sha }} \
+            format --sqlfluff --fail-if-changed .
           docker run --rm \
-            ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.IMAGE }}:${{ github.sha }} \
+            -v ${{ github.workspace }}:/app \
+            ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.IMAGE }}/${{ env.IMAGE }}:${{ github.sha }} \
             validate .
 
       # 3. push image if all validations pass
       - name: Push Docker Image
         run: |
-          docker push ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.IMAGE }}:${{ github.sha }}
-          docker tag ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.IMAGE }}:${{ github.sha }} ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.IMAGE }}:latest
-          docker push ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.IMAGE }}:latest
+          docker push ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.IMAGE }}/${{ env.IMAGE }}:${{ github.sha }}
+          docker tag ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.IMAGE }}/${{ env.IMAGE }}:${{ github.sha }} ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.IMAGE }}/${{ env.IMAGE }}:latest
+          docker push ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.IMAGE }}/${{ env.IMAGE }}:latest
 
   deploy:
     needs: validate-and-build
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' && (github.ref_name == 'main' || github.ref_name == 'staging')
-    environment: ${{ github.ref_name == 'main' && 'production' || 'staging' }}
+    if: github.event_name == 'push' && (github.ref_name == 'production' || github.ref_name == 'staging')
+    environment: ${{ github.ref_name == 'production' && 'production' || 'staging' }}
     permissions:
       contents: read
       id-token: write
@@ -96,10 +94,10 @@ jobs:
           workload_identity_provider: ${{ secrets.GCP_WID_PROVIDER }}
           service_account: ${{ secrets.GCP_SA_EMAIL }}
 
-      - name: Deploy Cloud Run
+      - name: Deploy Cloud Run Job
         uses: google-github-actions/deploy-cloudrun@v2
         with:
-          service: mma-pipeline-service
-          image: ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.IMAGE }}:${{ github.sha }}
+          job: mma-stats-pipeline
+          image: ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.IMAGE }}/${{ env.IMAGE }}:${{ github.sha }}
           region: ${{ env.REGION }}
 

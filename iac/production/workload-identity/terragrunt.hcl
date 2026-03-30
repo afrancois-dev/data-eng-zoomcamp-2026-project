@@ -14,7 +14,7 @@ inputs = {
   sa_mappings = {
     "mma-stats" = {
       sa_name   = dependency.service_account.outputs.email
-      attribute = "attribute.repository/afrancois-dev/data-eng-zoomcamp-2026-project:ref/refs/heads/main"
+      attribute = "attribute.repository/afrancois-dev/data-eng-zoomcamp-2026-project:ref/refs/heads/production"
     }
   }
 }

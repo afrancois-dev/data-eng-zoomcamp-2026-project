@@ -100,6 +100,17 @@ Gcloud auth login to be able to build GCP ressources
 ```
 gcloud auth application-default login
 ```
+NB: On GCP UI or console, don't forget to activate all needed services
+- Google artifact
+- IAM
+- BigQuery
+- ...
+
+```
+gcloud services enable iamcredentials.googleapis.com --project=mma-stats-staging
+gcloud services enable run.googleapis.com --project mma-stats-staging 
+...
+```
 
 Create ressources - terragrunt
 ```
@@ -107,6 +118,14 @@ terragrunt hcl fmt
 cd iac/staging # (or iac/production)
 terragrunt run -all plan
 terragrunt run -all apply
+```
+NB: A docker image should be pushed to Artifact repository beforehand to create the cloud run job
+
+## Docker (local)
+
+Just for test purpose (to see whether the image is correctly built)
+```
+docker build -t mma-stats:test . && docker run --rm mma-stats:test --version
 ```
 
 ## CI/CD
@@ -117,3 +136,5 @@ terragrunt run -all apply
   - production
     - fill GCP_WORKLOAD_IDENTITY_PROVIDER (go to GCP to see the value)
     - fill GCP_SERVICE_ACCOUNT : mma-stats-sa@mma-stats-staging.iam.gserviceaccount.com
+
+
