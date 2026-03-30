@@ -29,7 +29,8 @@ RUN --mount=type=cache,target=/root/.cache/uv \
     --mount=type=bind,source=app/pyproject.toml,target=pyproject.toml \
     uv sync --frozen --no-install-project --no-dev --group ci --all-extras
 
-# copy the application code
+# copy the application code, and git for bruin
+COPY .git/ /app/.git/
 COPY app/ /app/
 
 # sync the project

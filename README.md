@@ -38,6 +38,9 @@ uv sync --dev
 
 ### 2. Development workflow
 ```bash
+# source env
+source .venv/bin/activate (within app/)
+
 # validate the pipeline
 bruin validate app/
 
