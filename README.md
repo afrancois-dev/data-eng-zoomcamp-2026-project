@@ -76,9 +76,10 @@ Cloud Scheduler (added manually -> btwn I am going to add it later to terragrunt
 
 ### CI/CD Configuration (GitHub Actions)
 The project uses **Workload Identity Federation**. Configure your GitHub environments with:
-- 2 github repository environment (staging & production)
-  - `GCP_WID_PROVIDER`
-  - `GCP_SA_EMAIL`
+- 2 github environments (staging & production)
+  - with two secrets
+    - `GCP_WID_PROVIDER`
+    - `GCP_SA_EMAIL`
 
 ## 📊 Data modeling
 - **dim_fighters**: fighters (scd2)
