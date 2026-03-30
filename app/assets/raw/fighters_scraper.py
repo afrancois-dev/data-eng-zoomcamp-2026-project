@@ -2,15 +2,27 @@
 
 name: raw.fighters
 connection: duckdb-dev
+tags:
+  - scraper
+  - fighters
 
 materialization:
   type: table
   strategy: create+replace
 
 columns:
+  - name: url
+    type: string
+    primary_key: true
   - name: first_name
     type: string
   - name: last_name
+    type: string
+  - name: nick_name
+    type: string
+  - name: height
+    type: string
+  - name: weight
     type: string
   - name: wins
     type: integer
@@ -21,24 +33,21 @@ import requests
 from bs4 import BeautifulSoup
 import pandas as pd
 import string
+import logging
 
 
 def scrape_fighters(char: str):
-    url = f"http://ufcstats.com/statistics/fighters?char={char}&page=all"
-    response = requests.get(url, timeout=10)
+    response = requests.get(f"http://ufcstats.com/statistics/fighters?char={char}&page=all", timeout=10)
     response.raise_for_status()
+    rows = BeautifulSoup(response.text, "html.parser").select("tr.b-statistics__table-row")[1:]
 
-    soup = BeautifulSoup(response.text, "html.parser")
-    rows = soup.select("tr.b-statistics__table-row")[1:]
-
-    data = []
     for row in rows:
         cells = row.select("td")
         if len(cells) < 8:
-            continue
-
-        data.append(
-            {
+            logging.debug(f"Skipping row with insufficient cells: {len(cells)}")
+        else:
+            yield {
+                "url": (cells[0].select_one("a") or {}).get("href"),
                 "first_name": cells[0].text.strip(),
                 "last_name": cells[1].text.strip(),
                 "nick_name": cells[2].text.strip(),
@@ -46,18 +55,14 @@ def scrape_fighters(char: str):
                 "weight": cells[4].text.strip(),
                 "wins": int(cells[7].text.strip()) if cells[7].text.strip().isdigit() else None,
             }
-        )
-    return data
 
 
 def materialize() -> pd.DataFrame:
-    all_fighters = []
-
-    for char in string.ascii_lowercase[0]:
+    all_fighters, alphabet = [], string.ascii_lowercase
+    for i, char in enumerate(alphabet, 1):
         try:
-            fighters = scrape_fighters(char)
-            all_fighters.extend(fighters)
+            all_fighters.extend(list(scrape_fighters(char)))
+            logging.info(f"Progress: {i / len(alphabet):.1%} ({char})")
         except Exception as e:
-            print(f"Error scraping {char}: {e}")
-
+            logging.error(f"Error scraping {char}: {e}")
     return pd.DataFrame(all_fighters)

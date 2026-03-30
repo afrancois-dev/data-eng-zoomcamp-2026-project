@@ -2,6 +2,9 @@
 
 name: raw.bouts
 connection: duckdb-dev
+tags:
+  - scraper
+  - bouts
 
 materialization:
   type: table
@@ -39,6 +42,7 @@ import pandas as pd
 import time
 import random
 from bruin import query
+import logging
 
 
 def scrape_bouts_from_event(event_url):
@@ -106,9 +110,9 @@ def materialize() -> pd.DataFrame:
                 # wait 1 sec + random between 0 and 300ms to do not disturb the service
                 time.sleep(1 + random.uniform(0, 0.3))
             except Exception as e:
-                print(f"Error scraping event {url}: {e}")
+                logging.error(f"Error scraping event {url}: {e}")
 
         return pd.DataFrame(all_bouts)
     except Exception as e:
-        print(f"Error during bout scraping: {e}")
+        logging.error(f"Error during bout scraping: {e}")
         return pd.DataFrame()

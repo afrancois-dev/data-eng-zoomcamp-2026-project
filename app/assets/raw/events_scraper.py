@@ -2,6 +2,9 @@
 
 name: raw.events
 connection: duckdb-dev
+tags:
+  - scraper
+  - events
 
 materialization:
   type: table
@@ -24,49 +27,44 @@ import requests
 from bs4 import BeautifulSoup
 import pandas as pd
 from datetime import datetime
+import logging
 
 
 def scrape_events():
-    url = "http://ufcstats.com/statistics/events/completed?page=all"
-    response = requests.get(url, timeout=15)
+    response = requests.get("http://ufcstats.com/statistics/events/completed?page=all", timeout=15)
     response.raise_for_status()
 
-    soup = BeautifulSoup(response.text, "html.parser")
-    # the events are in a table with class b-statistics__table-events
-    rows = soup.select("tr.b-statistics__table-row")
-
-    data = []
-    for row in rows:
-        # skip header rows or rows that don't have the expected link
+    rows = BeautifulSoup(response.text, "html.parser").select("tr.b-statistics__table-row")
+    for i, row in enumerate(rows, 1):
         link = row.select_one("a.b-link.b-link_style_black")
-        if not link:
-            continue
-
         cells = row.select("td")
-        if len(cells) < 2:
-            continue
-        try:
-            date_span = cells[0].select_one("span.b-statistics__date")
-            if date_span:
-                event_date = datetime.strptime(date_span.text.strip(), "%B %d, %Y").date()
-        except ValueError:
-            event_date = None
 
-        data.append(
-            {
+        if not link:
+            logging.debug(f"Skipping row {i}: link not found")
+        elif not cells or len(cells) < 2:
+            logging.debug(f"Skipping row {i}: insufficient cells")
+        else:
+            try:
+                date_span = cells[0].select_one("span.b-statistics__date")
+                date_str = date_span.text.strip() if date_span else ""
+                event_date = datetime.strptime(date_str, "%B %d, %Y").date()
+            except (AttributeError, ValueError):
+                event_date = None
+
+            if i % 50 == 0 or i == len(rows):
+                logging.info(f"Progress: {i / len(rows):.1%} ({i}/{len(rows)} events processed)")
+
+            yield {
                 "name": link.text.strip(),
                 "url": link.get("href"),
                 "date": event_date,
                 "location": cells[1].text.strip(),
             }
-        )
-    return data
 
 
 def materialize() -> pd.DataFrame:
     try:
-        events = scrape_events()
-        return pd.DataFrame(events)
+        return pd.DataFrame(scrape_events())
     except Exception as e:
-        print(f"Error during event scraping: {e}")
-        return pd.DataFrame(columns=["name", "url", "date", "location"])
+        logging.error(f"Error during event scraping: {e}")
+        return pd.DataFrame()

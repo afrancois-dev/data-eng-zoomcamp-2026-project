@@ -2,6 +2,9 @@
 
 name: dwh.fact_bouts
 type: duckdb.sql
+tags:
+  - fact
+  - bouts
 
 materialization:
   type: table

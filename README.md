@@ -61,8 +61,15 @@ uv --directory app run prek install
 ```
 
 ## Debug commands
+
+Query a dataset
 ```
 bruin query --connection "duckdb-dev" --query "SELECT * FROM staging.fighters LIMIT 10" --description "Checking the content of staging.fighters table"
+```
+
+Run bruin based on tag : first load
+```
+bruin run app --full-refresh --tag fighters
 ```
 
 ## NB

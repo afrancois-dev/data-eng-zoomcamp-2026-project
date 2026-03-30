@@ -43,3 +43,25 @@ bruin run --full-refresh assets/dwh/dim_fighters.sql
 *   **Ingestion**: `assets/raw/*.py`
 *   **Staging**: `assets/staging/*.sql`
 *   **Analytics**: `assets/dwh/*.sql`
+
+
+## Development Journey
+- first day 
+    - set up everything
+        - linting, formating, typing
+        - install
+    - devex
+    - bruin : only fighters, and just getting bouts and events raw data.
+        - raw/
+            - staging/
+                - dwh/ (just thinking about the structure with the minimum fiels i.e first_name, last_name, nick_name and wins for fighters to have an end to end pipeline already)
+    - 
+
+
+- second day
+    - data modeling
+        - modeling events, bouts, fighters
+            - identifying fact and dim
+            - finding suitable surrogate_key candidates
+            - use scd2 whenever possible
+            - use macros

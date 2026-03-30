@@ -2,6 +2,8 @@
 
 name: staging.bouts
 type: duckdb.sql
+tags:
+  - bouts
 
 materialization:
   type: table

@@ -2,6 +2,9 @@
 
 name: dwh.dim_events
 type: duckdb.sql
+tags:
+  - dim
+  - events
 
 materialization:
   type: table

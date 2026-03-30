@@ -2,6 +2,8 @@
 
 name: staging.fighters
 type: duckdb.sql
+tags:
+  - fighters
 
 materialization:
   type: table

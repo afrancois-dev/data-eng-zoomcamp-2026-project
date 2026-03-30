@@ -2,6 +2,9 @@
 
 name: dwh.dim_fighters
 type: duckdb.sql
+tags:
+  - dim
+  - fighters
 
 materialization:
   type: table

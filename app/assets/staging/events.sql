@@ -2,6 +2,8 @@
 
 name: staging.events
 type: duckdb.sql
+tags:
+  - events
 
 materialization:
   type: table
