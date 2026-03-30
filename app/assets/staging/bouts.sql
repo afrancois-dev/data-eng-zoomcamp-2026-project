@@ -41,8 +41,8 @@ columns:
 @bruin */
 
 SELECT
-    bout_url,
-    event_url,
+    {{ generate_surrogate_key(['bout_url']) }} as id,
+    {{ generate_surrogate_key(['event_url']) }} as event_id,
     fighter_1,
     fighter_2,
     winner,

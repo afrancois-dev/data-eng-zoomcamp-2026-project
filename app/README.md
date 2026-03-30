@@ -1,102 +1,45 @@
-# Bruin - Sample Pipeline
-get bout, fighters and events
+# MMA Stats - Bruin Data Pipeline 🥊
 
-Congrats! 🎉 You just created your first Bruin Pipeline!
+This project is a modern data platform for MMA (UFC) statistics analysis, built with **Bruin**, **DuckDB**, and **SCD2** principles.
 
-This pipeline is a simple example of a Bruin project. It demonstrates how to use the `bruin` CLI to build and run a pipeline.
-DuckDB was chosen for its simplicity. This setup assumes DuckDB is available; you can swap `duckdb.sql` asset types.
+## Project Architecture
 
-The pipeline includes the following sample assets:
-- `dataset.players`: An ingestr asset that loads chess player data into DuckDB.
-- `dataset.player_stats`: A DuckDB SQL asset that builds a table from `dataset.players`.
-- `my_python_asset`: A Python asset that prints a message.
+The pipeline is organized into three distinct layers:
 
-## Setup
-This template includes a `.bruin.yml` with sample DuckDB and chess connections. You can replace or extend with your connections and environments as needed.
+1.  **Raw (Sources)**: Python scrapers that extract raw data for bouts, events, and fighters.
+2.  **Staging**: Initial cleaning and generation of deterministic **Surrogate Keys** (MD5) to ensure pipeline integrity.
+3.  **DWH (Data Warehouse)**:
+    *   `dim_fighters`: A **SCD2** (Slowly Changing Dimension Type 2) dimension to track fighter evolution (weight, record) over time.
+    *   `dim_events`: UFC events dimension.
+    *   `fact_bouts`: Central fact table gathering all bout results.
 
-Here's a sample `.bruin.yml` file:
+## Configuration
 
-```yaml
-default_environment: default
-environments:
-  default:
-    connections:
-      duckdb:
-        - name: "duckdb-default"
-          path: "duckdb.db"
-      chess:
-        - name: "chess-default"
-          players:
-            - "MagnusCarlsen"
-            - "Hikaru"
-```
+The project uses DuckDB as a local storage engine for local env. The configuration can be found in `.bruin.yml`.
 
-You can simply switch the environment using the `--environment` flag, e.g.:
+### Quick Setup
 
-```shell
-bruin validate --environment production . 
-```
+1.  Ensure Bruin CLI is installed.
+2.  Validate the project:
+    ```bash
+    bruin validate .
+    ```
 
-## Running the pipeline
+## Usage
 
-bruin CLI can run the whole pipeline or any task with the downstreams:
-
-```shell
+### Run the complete pipeline
+```bash
 bruin run .
 ```
 
-```shell
-Starting the pipeline execution...
-
-[18:42:58] Running:  my_python_asset
-[18:42:58] Running:  dataset.players
-[18:42:58] [my_python_asset] >> warning: `--no-sync` has no effect when used outside of a project
-[18:42:58] [my_python_asset] >> hello world
-[18:42:58] Finished: my_python_asset (191ms)
-⋮
-[18:43:04] Finished: dataset.player_stats:player_count:not_null (24ms)
-[18:43:04] Finished: dataset.player_stats:player_count:positive (33ms)
-[18:43:04] Finished: dataset.player_stats:name:unique (42ms)
-
-==================================================
-
-PASS my_python_asset 
-PASS dataset.players 
-PASS dataset.player_stats .....
-
-
-bruin run completed successfully in 5.439s
-
- ✓ Assets executed      3 succeeded
- ✓ Quality checks       5 succeeded
+### Initialize SCD2 (Full Refresh)
+For the first run of the historical fighter dimension:
+```bash
+bruin run --full-refresh assets/dwh/dim_fighters.sql
 ```
 
-You can also run a single task:
+## Assets Structure
 
-```shell
-bruin run assets/my_python_asset.py                         
-```
-
-```shell
-Starting the pipeline execution...
-
-[23:00:02] Running:  my_python_asset
-[23:00:02] >> warning: `--no-sync` has no effect when used outside of a project
-[23:00:02] >> hello world
-[23:00:02] Finished: my_python_asset (162ms)
-
-==================================================
-
-PASS my_python_asset 
-
-
-bruin run completed successfully in 162ms
-
- ✓ Assets executed      1 succeeded
-```
-
-You can optionally pass a `--downstream` flag to run the task with all of its downstreams.
-
-That's it, you are all set. Happy Building!
-
-If you want to dig deeper, jump into the [Concepts](https://getbruin.com/docs/bruin/getting-started/concepts.html) to learn more about the underlying concepts Bruin use for your data pipelines.
+*   **Ingestion**: `assets/raw/*.py`
+*   **Staging**: `assets/staging/*.sql`
+*   **Analytics**: `assets/dwh/*.sql`

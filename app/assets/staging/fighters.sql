@@ -38,11 +38,12 @@ columns:
 
 @bruin */
 
-WITH source AS (
-    SELECT
-        *,
-        CONCAT(first_name, '_', last_name, '_', nick_name) AS id
-    FROM raw.fighters
-)
-
-SELECT * FROM source
+SELECT
+  {{ generate_surrogate_key(['first_name', 'last_name', 'nick_name']) }} AS id,
+  first_name,
+  last_name,
+  nick_name,
+  height,
+  weight,
+  wins
+FROM raw.fighters

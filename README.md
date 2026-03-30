@@ -67,3 +67,8 @@ bruin query --connection "duckdb-dev" --query "SELECT * FROM staging.fighters LI
 
 ## NB
 - I stored raw/ data on bigquery because the price is the same as gcs
+- DWH
+  - dim_fighters
+    - I would have like to have a surrogate key not based on url, however; last_name can change for women when they are getting married. Also nickname is not a suitable candidate as it is not immutable
+  - dim_events
+    - location could change, date can also change -> url as the surrogate key

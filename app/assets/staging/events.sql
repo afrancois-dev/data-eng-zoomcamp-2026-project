@@ -32,4 +32,9 @@ columns:
 
 @bruin */
 
-SELECT * FROM raw.events
+SELECT
+    {{ generate_surrogate_key(['url']) }} as id,
+    name,
+    date,
+    location
+FROM raw.events
