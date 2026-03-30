@@ -27,7 +27,7 @@ columns:
 @bruin */
 
 SELECT
-    id AS event_id,
+    id,
     name,
     date,
     location

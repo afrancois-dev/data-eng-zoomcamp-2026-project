@@ -70,6 +70,7 @@ bruin query --connection "duckdb-dev" --query "SELECT * FROM staging.fighters LI
 Run bruin based on tag : first load
 ```
 bruin run app --full-refresh --tag fighters
+bruin run app --full-refresh --tag events
 ```
 
 ## NB

@@ -13,12 +13,12 @@ depends:
   - raw.events
 
 columns:
-  - name: name
+  - name: id
     type: VARCHAR
     checks:
       - name: not_null
       - name: unique
-  - name: url
+  - name: name
     type: VARCHAR
     checks:
       - name: not_null
