@@ -74,6 +74,9 @@ The project uses **Workload Identity Federation**. Configure your GitHub environ
 - **dim_events**: events (scd2)
 - **fact_bouts**: bouts containing (fact)
 
+## Viz - Looker
+
+
 ## 📝 Suggestions
 - [ ] Streamlit dashboard for stats visualization.
 - [ ] Slack webhook alerts for pipeline failures.
