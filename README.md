@@ -1,5 +1,6 @@
 # MMA Stats - Data Engineering Project
-[![Orchestration: Bruin](https://img.shields.io/badge/Orchestration-Bruin-orange)](https://getbruin.com)
+[![Orchestration: Cloud Scheduler](https://img.shields.io/badge/Orchestration-Cloud_Scheduler-4285F4?logo=clock&logoColor=white)](https://cloud.google.com/scheduler)
+[![Data Platform: Bruin](https://img.shields.io/badge/Data-Platform-Bruin-orange)](https://getbruin.com)
 [![Infrastructure: Terragrunt](https://img.shields.io/badge/Infrastructure-Terragrunt-4C51BF?logo=terraform&logoColor=white)](https://terragrunt.gruntwork.io/)
 [![Cloud: GCP](https://img.shields.io/badge/Cloud-GCP-4285F4?logo=google-cloud&logoColor=white)](https://cloud.google.com/)
 [![CI/CD: GitHub Actions](https://img.shields.io/badge/CI/CD-GitHub_Actions-2088FF?logo=github-actions&logoColor=white)](https://github.com/features/actions)
