@@ -1,7 +1,6 @@
 /* @bruin
 
 name: staging.events
-type: duckdb.sql
 tags:
   - events
 
@@ -14,12 +13,12 @@ depends:
 
 columns:
   - name: id
-    type: VARCHAR
+    type: STRING
     checks:
       - name: not_null
       - name: unique
   - name: name
-    type: VARCHAR
+    type: STRING
     checks:
       - name: not_null
       - name: unique
@@ -28,7 +27,7 @@ columns:
     checks:
       - name: not_null
   - name: location
-    type: VARCHAR
+    type: STRING
     checks:
       - name: not_null
 

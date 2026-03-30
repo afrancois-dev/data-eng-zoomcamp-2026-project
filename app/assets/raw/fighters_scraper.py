@@ -1,7 +1,7 @@
 """@bruin
 
 name: raw.fighters
-connection: duckdb-dev
+connection: db
 tags:
   - raw
   - fighters
@@ -11,8 +11,8 @@ materialization:
   strategy: create+replace
 
 secrets:
-  - key: duckdb-dev
-    inject_as: duckdb-dev
+  - key: db
+    inject_as: db
 
 columns:
   - name: url

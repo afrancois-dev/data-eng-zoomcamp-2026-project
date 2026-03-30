@@ -1,7 +1,6 @@
 /* @bruin
 
 name: dwh.fact_bouts
-type: duckdb.sql
 tags:
   - fact
   - bouts
@@ -17,24 +16,26 @@ depends:
 
 columns:
   - name: bout_id
-    type: VARCHAR
+    type: STRING
     primary_key: true
   - name: event_id
-    type: VARCHAR
+    type: STRING
+  - name: date
+    type: DATE
   - name: fighter_1_id
-    type: VARCHAR
+    type: STRING
   - name: fighter_2_id
-    type: VARCHAR
+    type: STRING
   - name: winner_id
-    type: VARCHAR
+    type: STRING
   - name: weight_class
-    type: VARCHAR
+    type: STRING
   - name: method
-    type: VARCHAR
+    type: STRING
   - name: round
-    type: INTEGER
+    type: INT64
   - name: time
-    type: VARCHAR
+    type: STRING
 
 @bruin */
 
@@ -47,5 +48,6 @@ SELECT
     weight_class,
     method,
     round,
-    time
+    time,
+    date
 FROM staging.bouts

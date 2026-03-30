@@ -11,6 +11,7 @@ dependency "service_account" {
 }
 
 inputs = {
+  service_account_id = dependency.service_account.outputs.name
   sa_mappings = {
     "mma-stats" = {
       sa_name   = dependency.service_account.outputs.email

@@ -1,7 +1,6 @@
 /* @bruin
 
 name: staging.fighters
-type: duckdb.sql
 tags:
   - fighters
 
@@ -14,26 +13,26 @@ depends:
 
 columns:
   - name: id
-    type: VARCHAR
+    type: STRING
     primary_key: true
     checks:
       - name: not_null
   - name: first_name
-    type: VARCHAR
+    type: STRING
     checks:
       - name: not_null
   - name: last_name
-    type: VARCHAR
+    type: STRING
     checks:
       - name: not_null
   - name: nick_name
-    type: VARCHAR
+    type: STRING
   - name: height
-    type: VARCHAR
+    type: STRING
   - name: weight
-    type: VARCHAR
+    type: STRING
   - name: wins
-    type: BIGINT
+    type: INT64
     checks:
       - name: min
         value: 0

@@ -1,0 +1,21 @@
+default_environment: dev
+environments:
+  dev:
+    connections:
+      duckdb:
+        - name: "db"
+          path: "duckdb-dev.db"
+  staging:
+    connections:
+      google_cloud_platform:
+        - name: "db"
+          project_id: "mma-stats-staging"
+          location: "europe-west1"
+          use_application_default_credentials: true
+  production:
+    connections:
+      google_cloud_platform:
+        - name: "db"
+          project_id: "mma-stats-production"
+          location: "europe-west1"
+          use_application_default_credentials: true

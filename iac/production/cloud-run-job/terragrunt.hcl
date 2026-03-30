@@ -3,6 +3,5 @@ include "root" {
 }
 
 include "envcommon" {
-  path   = "../../_envcommon/cloud-run-job.hcl"
-  expose = true
+  path = "../../_envcommon/cloud-run-job.hcl"
 }

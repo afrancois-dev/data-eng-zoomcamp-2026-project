@@ -1,7 +1,6 @@
 /* @bruin
 
 name: dwh.dim_fighters
-type: duckdb.sql
 tags:
   - dim
   - fighters
@@ -15,20 +14,20 @@ depends:
 
 columns:
   - name: id
-    type: VARCHAR
+    type: STRING
     primary_key: true
   - name: first_name
-    type: VARCHAR
+    type: STRING
   - name: last_name
-    type: VARCHAR
+    type: STRING
   - name: nick_name
-    type: VARCHAR
+    type: STRING
   - name: height
-    type: VARCHAR
+    type: STRING
   - name: weight
-    type: VARCHAR
+    type: STRING
   - name: wins
-    type: BIGINT
+    type: INT64
 
 @bruin */
 

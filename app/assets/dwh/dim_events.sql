@@ -1,7 +1,6 @@
 /* @bruin
 
 name: dwh.dim_events
-type: duckdb.sql
 tags:
   - dim
   - events
@@ -15,14 +14,14 @@ depends:
 
 columns:
   - name: id
-    type: VARCHAR
+    type: STRING
     primary_key: true
   - name: name
-    type: VARCHAR
+    type: STRING
   - name: date
     type: DATE
   - name: location
-    type: VARCHAR
+    type: STRING
 
 @bruin */
 

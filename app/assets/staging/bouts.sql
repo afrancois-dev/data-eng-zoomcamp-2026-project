@@ -1,7 +1,6 @@
 /* @bruin
 
 name: staging.bouts
-type: duckdb.sql
 tags:
   - bouts
 
@@ -14,32 +13,36 @@ depends:
 
 columns:
   - name: bout_id
-    type: VARCHAR
+    type: STRING
     primary_key: true
     checks:
       - name: not_null
   - name: event_id
-    type: VARCHAR
+    type: STRING
+    checks:
+      - name: not_null
+  - name: date
+    type: DATE
     checks:
       - name: not_null
   - name: fighter_1_id
-    type: VARCHAR
+    type: STRING
     checks:
       - name: not_null
   - name: fighter_2_id
-    type: VARCHAR
+    type: STRING
     checks:
       - name: not_null
   - name: winner_id
-    type: VARCHAR
+    type: STRING
   - name: weight_class
-    type: VARCHAR
+    type: STRING
   - name: method
-    type: VARCHAR
+    type: STRING
   - name: round
-    type: INTEGER
+    type: INT64
   - name: time
-    type: VARCHAR
+    type: STRING
 
 @bruin */
 
@@ -52,5 +55,6 @@ SELECT
     weight_class,
     method,
     time,
-    CAST(round AS INTEGER) AS round
+    date,
+    CAST(round AS INT64) AS round
 FROM raw.bouts

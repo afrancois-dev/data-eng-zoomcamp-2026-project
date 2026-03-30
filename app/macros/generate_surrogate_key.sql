@@ -1,9 +1,12 @@
--- based on bruin docs
+-- based on bruin doc
+-- compatible for both duckdb and bigquery 
+-- not hashed in md5 at this moment -> TODO
+-- nb for bruin developer -> environment should be in built-in method
 {% macro generate_surrogate_key(columns) -%}
-MD5(CONCAT_WS('||',
+CONCAT(
     {%- for col in columns %}
-        CAST({{ col }} AS VARCHAR)
-        {%- if not loop.last %}, {% endif %}
+        CAST({{ col }} AS STRING)
+        {%- if not loop.last %}, '||', {% endif %}
     {%- endfor %}
-))
+)
 {%- endmacro %}
