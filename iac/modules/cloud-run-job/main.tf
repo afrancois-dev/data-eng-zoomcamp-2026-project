@@ -34,14 +34,15 @@ resource "google_cloud_run_v2_job" "default" {
       service_account = var.service_account_email
       containers {
         image = var.image_url
-        
+        # we let bruin retry on its side
+        max_retries = 0
         # Default Bruin command
         args = ["run", ".", "--environment", trimprefix(var.project_id, "mma-stats-")]
 
         resources {
           limits = {
             cpu    = "1"
-            memory = "2Gi"
+            memory = "4Gi"
           }
         }
       }
