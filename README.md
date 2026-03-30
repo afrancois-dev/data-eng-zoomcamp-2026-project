@@ -27,7 +27,7 @@ The architecture follows a **medallion-inspired lakehouse** pattern:
 - **Environments**: local, staging, production.
 - **Security**: GitHub workload identity federation (keyless auth).
 
-## 🚀 Quick Start
+## 🚀 Quick start
 
 ### 1. Prerequisites
 ```bash
@@ -36,25 +36,28 @@ curl -LsSf https://getbruin.com/install/cli | sh
 uv sync --dev
 ```
 
-### 2. Development Workflow
+### 2. Development workflow
 ```bash
-# Validate the pipeline
+# validate the pipeline
 bruin validate app/
 
-# Formatting
+# formatting
 uv run ruff format
 bruin format app/ --sqlfluff
 
-# Local execution (DuckDB)
-bruin run app/ --full-refresh
+# local execution (DuckDB)
+bruin run app --full-refresh
+
+# staging execution
+bruin run app --environment staging
 ```
 
-## 🌍 Infrastructure & Deployment
+## 🌍 Infrastructure & deployment
 
 ### Deployment with Terragrunt
 ```bash
 cd iac/staging # or production
-terragrunt run-all apply
+terragrunt run -all apply
 ```
 
 ### CI/CD Configuration (GitHub Actions)
