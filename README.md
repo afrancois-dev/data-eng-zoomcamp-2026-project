@@ -83,3 +83,37 @@ bruin run app --full-refresh --tag bouts --debug
     - I would have like to have a surrogate key not based on url, however; last_name can change for women when they are getting married. Also nickname is not a suitable candidate as it is not immutable
   - dim_events
     - location could change, date can also change -> url as the surrogate key
+
+## IAC
+
+Install terraform
+```
+Follow instruction on : https://developer.hashicorp.com/terraform/install
+```
+
+Install terragrunt (a wrapper for terraform)
+```
+curl -sL https://docs.terragrunt.com/install | bash
+```
+
+Gcloud auth login to be able to build GCP ressources
+```
+gcloud auth application-default login
+```
+
+Create ressources - terragrunt
+```
+terragrunt hcl fmt
+cd iac/staging # (or iac/production)
+terragrunt run -all plan
+terragrunt run -all apply
+```
+
+## CI/CD
+- create 2 githbub repository environments
+  - staging
+    - fill GCP_WORKLOAD_IDENTITY_PROVIDER (go to GCP to see the value)
+    - fill GCP_SERVICE_ACCOUNT : mma-stats-sa@mma-stats-staging.iam.gserviceaccount.com
+  - production
+    - fill GCP_WORKLOAD_IDENTITY_PROVIDER (go to GCP to see the value)
+    - fill GCP_SERVICE_ACCOUNT : mma-stats-sa@mma-stats-staging.iam.gserviceaccount.com

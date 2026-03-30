@@ -1,5 +1,5 @@
 include "root" {
-  path = find_in_parent_folders()
+  path = find_in_parent_folders("root.hcl")
 }
 
 include "envcommon" {
@@ -11,10 +11,6 @@ dependency "service_account" {
 }
 
 inputs = {
-  sa_mappings = {
-    "mma-stats" = {
-      sa_name   = dependency.service_account.outputs.email
-      attribute = "attribute.repository/afrancois-dev/data-eng-zoomcamp-2026-project:ref/refs/heads/staging"
-    }
-  }
+  service_account_id = dependency.service_account.outputs.name
+  repository_name    = "afrancois-dev/data-eng-zoomcamp-2026-project"
 }

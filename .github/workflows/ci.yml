@@ -15,11 +15,12 @@ env:
   REGION: europe-west1
   ENVIRONMENT: "${{ github.ref_name == 'main' && 'production' || 'staging' }}"
   PROJECT_ID: "mma-stats-${{ github.ref_name == 'main' && 'production' || 'staging' }}"
-  IMAGE: mma-pipeline
+  IMAGE: mma-stats
 
 jobs:
   validate-and-build:
     runs-on: ubuntu-latest
+    environment: ${{ github.ref_name == 'main' && 'production' || 'staging' }}
     permissions:
       contents: read
       id-token: write
@@ -80,6 +81,7 @@ jobs:
     needs: validate-and-build
     runs-on: ubuntu-latest
     if: github.event_name == 'push' && (github.ref_name == 'main' || github.ref_name == 'staging')
+    environment: ${{ github.ref_name == 'main' && 'production' || 'staging' }}
     permissions:
       contents: read
       id-token: write

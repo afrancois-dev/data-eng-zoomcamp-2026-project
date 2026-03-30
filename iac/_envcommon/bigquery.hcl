@@ -1,8 +1,10 @@
 terraform {
-  source = "tfr:///terraform-google-modules/bigquery/google//modules/bigquery?version=7.0.0"
+  source = "${get_repo_root()}/iac/modules/bigquery"
 }
 
 inputs = {
-  dataset_id   = "mma_stats"
-  location     = "europe-west1"
+  dataset_id                 = "mma_stats"
+  description                = "Dataset for MMA stats project"
+  location                   = "EU"
+  delete_contents_on_destroy = true
 }

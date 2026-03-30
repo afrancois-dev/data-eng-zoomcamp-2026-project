@@ -1,15 +1,15 @@
 terraform {
-  source = "tfr:///terraform-google-modules/service-accounts/google//modules/simple-sa?version=4.2.0"
+  source = "${get_repo_root()}/iac/modules/service-account"
 }
 
 inputs = {
-  name          = "mma-stats"
-  display_name  = "mma-stats Service Account"
-  description   = "Service account for the mma-stats data pipeline"
-  project_roles = [
-    "roles/bigquery.dataEditor",
-    "roles/bigquery.jobUser",
-    "roles/artifactregistry.writer",
+  account_id   = "mma-stats-sa"
+  display_name = "mma-stats Service Account"
+  roles = [
+    "roles/bigquery.admin",
+    "roles/artifactregistry.admin",
     "roles/run.admin",
+    "roles/iam.serviceAccountUser",
+    "roles/storage.admin"
   ]
 }

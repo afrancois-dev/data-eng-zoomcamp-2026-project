@@ -41,3 +41,9 @@ repos:
         language: system
         pass_filenames: false
         stages: [pre-commit]
+      
+      - id: terragrunt-format
+        name: "Terragrunt Format"
+        language: system
+        stages: [pre-commit]
+        entry: terragrunt hcl fmt iac/
