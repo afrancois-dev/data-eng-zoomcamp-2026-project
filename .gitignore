@@ -213,3 +213,18 @@ logs/runs
 logs/*.log
 *.py[cod]
 logs/queries
+
+# terragrunt / terraform
+.terragrunt-cache
+.terraform
+.terraform.lock.hcl
+*.tfstate
+*.tfstate.*
+crash.log
+crash.*.log
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+.terraformrc
+terraform.rc
