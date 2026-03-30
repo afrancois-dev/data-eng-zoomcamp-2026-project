@@ -65,6 +65,15 @@ terragrunt run -all apply
 ```
 NB: Cloud scheduler has been added through the GCP UI. It is launched every day (at 01:00 UTC)
 
+
+Cloud Run deployed by terragrunt <br>
+<img width="600" height="300" alt="Screenshot 2026-03-30 at 23 16 14" src="https://github.com/user-attachments/assets/237b5146-1855-4af7-9dc7-ea29dc9c510c" />
+
+Cloud Scheduler (added manually -> btwn I am going to add it later to terragrunt. I was running out of time 😅)
+<img width="600" height="230" alt="Screenshot 2026-03-30 at 23 23 46" src="https://github.com/user-attachments/assets/9a4d2cc8-4114-4c8f-8862-fc75cec1de2b" />
+
+
+
 ### CI/CD Configuration (GitHub Actions)
 The project uses **Workload Identity Federation**. Configure your GitHub environments with:
 - 2 github repository environment (staging & production)
@@ -75,6 +84,8 @@ The project uses **Workload Identity Federation**. Configure your GitHub environ
 - **dim_fighters**: fighters (scd2)
 - **dim_events**: events (scd2)
 - **fact_bouts**: bouts containing (fact)
+<img width="593" height="324" alt="Screenshot 2026-03-30 at 23 15 22" src="https://github.com/user-attachments/assets/bc2bb435-a0e7-433e-9a36-e57d917e1d94" />
+
 
 ## Viz - Looker
 - https://lookerstudio.google.com/reporting/4de86c35-f0fb-4b7c-9875-e29bf6c66181
