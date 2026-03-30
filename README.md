@@ -62,6 +62,7 @@ bruin run app --environment staging
 cd iac/staging # or production
 terragrunt run -all apply
 ```
+NB: Cloud scheduler has been added through the GCP UI. It is launched every day (at 01:00 UTC)
 
 ### CI/CD Configuration (GitHub Actions)
 The project uses **Workload Identity Federation**. Configure your GitHub environments with:
