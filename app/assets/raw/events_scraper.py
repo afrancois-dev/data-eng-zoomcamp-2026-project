@@ -3,23 +3,27 @@
 name: raw.events
 connection: duckdb-dev
 tags:
-  - scraper
+  - raw
   - events
 
 materialization:
   type: table
   strategy: create+replace
 
+secrets:
+  - key: duckdb-dev
+    inject_as: duckdb-dev
+
 columns:
   - name: url
-    type: string
+    type: VARCHAR
     primary_key: true
   - name: name
-    type: string
+    type: VARCHAR
   - name: date
-    type: date
+    type: DATE
   - name: location
-    type: string
+    type: VARCHAR
 
 @bruin"""
 

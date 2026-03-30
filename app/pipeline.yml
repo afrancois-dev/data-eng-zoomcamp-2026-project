@@ -1,11 +1,17 @@
 name: mma-stats
-schedule: daily
+schedule: "0 1 * * *"
 start_date: "2026-03-29"
 catchup: false
 
 default_connections:
     duckdb: "duckdb-dev"
 default:
+    rerun_cooldown: 300
     type: duckdb.sql
+
+metadata_push:
+  bigquery: true
+
+retries: 1
 
 # variables:

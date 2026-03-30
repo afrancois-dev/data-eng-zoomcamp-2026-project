@@ -41,9 +41,9 @@ columns:
 SELECT
     bout_id,
     event_id,
-    fighter_1 AS fighter_1_id,
-    fighter_2 AS fighter_2_id,
-    winner AS winner_id,
+    fighter_1_id,
+    fighter_2_id,
+    winner_id,
     weight_class,
     method,
     round,

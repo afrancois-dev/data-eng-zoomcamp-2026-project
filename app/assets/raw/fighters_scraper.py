@@ -3,29 +3,33 @@
 name: raw.fighters
 connection: duckdb-dev
 tags:
-  - scraper
+  - raw
   - fighters
 
 materialization:
   type: table
   strategy: create+replace
 
+secrets:
+  - key: duckdb-dev
+    inject_as: duckdb-dev
+
 columns:
   - name: url
-    type: string
+    type: VARCHAR
     primary_key: true
   - name: first_name
-    type: string
+    type: VARCHAR
   - name: last_name
-    type: string
+    type: VARCHAR
   - name: nick_name
-    type: string
+    type: VARCHAR
   - name: height
-    type: string
+    type: VARCHAR
   - name: weight
-    type: string
+    type: VARCHAR
   - name: wins
-    type: integer
+    type: BIGINT
 
 @bruin"""
 

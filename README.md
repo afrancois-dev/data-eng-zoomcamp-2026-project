@@ -65,12 +65,15 @@ uv --directory app run prek install
 Query a dataset
 ```
 bruin query --connection "duckdb-dev" --query "SELECT * FROM staging.fighters LIMIT 10" --description "Checking the content of staging.fighters table"
+bruin query --connection duckdb-dev --query "SELECT count(*) FROM raw.bouts LIMIT 10"
+bruin run app --tag bouts --exclude-tag raw # once raw has been exec. -> to avoid running too long
 ```
 
 Run bruin based on tag : first load
 ```
 bruin run app --full-refresh --tag fighters
 bruin run app --full-refresh --tag events
+bruin run app --full-refresh --tag bouts --debug
 ```
 
 ## NB

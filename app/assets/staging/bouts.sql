@@ -13,23 +13,24 @@ depends:
   - raw.bouts
 
 columns:
-  - name: bout_url
+  - name: bout_id
+    type: VARCHAR
+    primary_key: true
+    checks:
+      - name: not_null
+  - name: event_id
     type: VARCHAR
     checks:
       - name: not_null
-  - name: event_url
+  - name: fighter_1_id
     type: VARCHAR
     checks:
       - name: not_null
-  - name: fighter_1
+  - name: fighter_2_id
     type: VARCHAR
     checks:
       - name: not_null
-  - name: fighter_2
-    type: VARCHAR
-    checks:
-      - name: not_null
-  - name: winner
+  - name: winner_id
     type: VARCHAR
   - name: weight_class
     type: VARCHAR
@@ -43,11 +44,11 @@ columns:
 @bruin */
 
 SELECT
-    {{ generate_surrogate_key(['bout_url']) }} as id,
+    {{ generate_surrogate_key(['bout_url']) }} as bout_id,
     {{ generate_surrogate_key(['event_url']) }} as event_id,
-    fighter_1,
-    fighter_2,
-    winner,
+    {{ generate_surrogate_key(['fighter_1']) }} as fighter_1_id,
+    {{ generate_surrogate_key(['fighter_2']) }} as fighter_2_id,
+    {{ generate_surrogate_key(['winner']) }} as winner_id,
     weight_class,
     method,
     time,
