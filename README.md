@@ -37,6 +37,11 @@ curl -LsSf https://getbruin.com/install/cli | sh
 uv sync --dev
 ```
 
+install pre-commit
+```
+uv --directory app run prek install
+```
+
 ### 2. Development workflow
 ```bash
 # source env
