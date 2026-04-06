@@ -98,6 +98,9 @@ The project uses **Workload Identity Federation**. Configure your GitHub environ
 - https://lookerstudio.google.com/reporting/4de86c35-f0fb-4b7c-9875-e29bf6c66181
 <img width="1214" height="770" alt="Screenshot 2026-03-30 at 22 54 44" src="https://github.com/user-attachments/assets/129c9be2-5894-4cad-9f08-0def727a8bc2" />
 
+## UI - Streamlit
+- generate a json key for your service account, and use it through streamlit cloud
+
 ## 📝 Suggestions
 - [ ] Streamlit dashboard for stats visualization.
 - [ ] Slack webhook alerts for pipeline failures.

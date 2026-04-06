@@ -18,5 +18,5 @@ inputs = {
   region   = "europe-west1"
   # We use the repository URL as a base, the initial version will be pushed via CI
   image_url             = "${dependency.artifact_registry.outputs.repository_url}/mma-stats:latest"
-  service_account_email = dependency.service_account.outputs.email
+  service_account_email = dependency.service_account.outputs.mma_stats_sa_email
 }
