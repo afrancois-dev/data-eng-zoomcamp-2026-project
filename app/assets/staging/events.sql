@@ -12,7 +12,7 @@ depends:
   - raw.events
 
 columns:
-  - name: id
+  - name: event_sk
     type: STRING
     checks:
       - name: not_null
@@ -34,7 +34,7 @@ columns:
 @bruin */
 
 SELECT
-    {{ generate_surrogate_key(['url']) }} as id,
+    {{ generate_surrogate_key(['url']) }} as event_sk,
     name,
     date,
     location

@@ -12,7 +12,7 @@ depends:
   - raw.fighters
 
 columns:
-  - name: id
+  - name: fighter_sk
     type: STRING
     primary_key: true
     checks:
@@ -40,7 +40,7 @@ columns:
 @bruin */
 
 SELECT
-  {{ generate_surrogate_key(['first_name', 'last_name', 'nick_name']) }} AS id,
+  {{ generate_surrogate_key(['url']) }} AS fighter_sk,
   first_name,
   last_name,
   nick_name,

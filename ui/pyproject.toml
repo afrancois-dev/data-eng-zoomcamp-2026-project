@@ -1,0 +1,11 @@
+[project]
+name = "ui"
+version = "0.1.0"
+description = "front-end"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "altair>=6.0.0,<6.1.0",
+    "pandas>=3.0.2,<3.1.0",
+    "streamlit>=1.56.0,<1.57.0",
+]

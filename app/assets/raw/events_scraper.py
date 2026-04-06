@@ -16,14 +16,14 @@ secrets:
 
 columns:
   - name: url
-    type: VARCHAR
+    type: STRING
     primary_key: true
   - name: name
-    type: VARCHAR
+    type: STRING
   - name: date
     type: DATE
   - name: location
-    type: VARCHAR
+    type: STRING
 
 @bruin"""
 

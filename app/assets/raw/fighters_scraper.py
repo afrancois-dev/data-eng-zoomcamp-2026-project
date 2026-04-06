@@ -16,18 +16,18 @@ secrets:
 
 columns:
   - name: url
-    type: VARCHAR
+    type: STRING
     primary_key: true
   - name: first_name
-    type: VARCHAR
+    type: STRING
   - name: last_name
-    type: VARCHAR
+    type: STRING
   - name: nick_name
-    type: VARCHAR
+    type: STRING
   - name: height
-    type: VARCHAR
+    type: STRING
   - name: weight
-    type: VARCHAR
+    type: STRING
   - name: wins
     type: BIGINT
 

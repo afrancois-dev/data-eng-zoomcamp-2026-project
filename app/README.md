@@ -1,6 +1,6 @@
 # MMA Stats - Bruin Data Pipeline 🥊
 
-This project is a modern data platform for MMA (UFC) statistics analysis, built with **Bruin**, **DuckDB**, and **SCD2** principles.
+This project is a modern data platform for MMA (UFC) statistics analysis, built with **Bruin**, **BigQuery**, and **SCD2** principles.
 
 ## Project Architecture
 
@@ -14,8 +14,6 @@ The pipeline is organized into three distinct layers:
     *   `fact_bouts`: Central fact table gathering all bout results.
 
 ## Configuration
-
-The project uses DuckDB as a local storage engine for local env. The configuration can be found in `.bruin.yml`.
 
 ### Quick Setup
 

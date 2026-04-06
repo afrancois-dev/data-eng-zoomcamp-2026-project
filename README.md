@@ -54,7 +54,7 @@ bruin validate app/
 uv run ruff format
 bruin format app/ --sqlfluff
 
-# local execution (DuckDB)
+# local execution (DuckDB) - deprecated because duckdb SQL is different from BigQuery
 bruin run app --full-refresh
 
 # staging execution
@@ -101,5 +101,5 @@ The project uses **Workload Identity Federation**. Configure your GitHub environ
 ## 📝 Suggestions
 - [ ] Streamlit dashboard for stats visualization.
 - [ ] Slack webhook alerts for pipeline failures.
-- [ ] Support for other organizations (hexagonemma, ares, pfl, ksw, Bellator).
+- [ ] Support for other organizations (hexagonemma, ares, pfl, ksw, Bellator). e.g inside raw/providers -> ares/ 
 - [ ] Gemini integration for predictive analysis.

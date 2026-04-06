@@ -13,7 +13,7 @@ depends:
   - staging.events
 
 columns:
-  - name: id
+  - name: event_sk
     type: STRING
     primary_key: true
   - name: name
@@ -26,7 +26,7 @@ columns:
 @bruin */
 
 SELECT
-    id,
+    event_sk,
     name,
     date,
     location

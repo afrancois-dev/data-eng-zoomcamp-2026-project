@@ -13,7 +13,7 @@ depends:
   - staging.fighters
 
 columns:
-  - name: id
+  - name: fighter_sk
     type: STRING
     primary_key: true
   - name: first_name

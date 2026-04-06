@@ -20,23 +20,29 @@ secrets:
 
 columns:
   - name: event_url
-    type: VARCHAR
+    type: STRING
   - name: bout_url
-    type: VARCHAR
-  - name: fighter_1
-    type: VARCHAR
-  - name: fighter_2
-    type: VARCHAR
-  - name: winner
-    type: VARCHAR
+    type: STRING
+  - name: fighter_1_url
+    type: STRING
+  - name: fighter_2_url
+    type: STRING
+  - name: fighter_1_full_name
+    type: STRING
+  - name: fighter_2_full_name
+    type: STRING
+  - name: winner_url
+    type: STRING
+  - name: winner_full_name
+    type: STRING
   - name: weight_class
-    type: VARCHAR
+    type: STRING
   - name: method
-    type: VARCHAR
+    type: STRING
   - name: round
-    type: VARCHAR
+    type: STRING
   - name: time
-    type: VARCHAR
+    type: STRING
   - name: date
     type: DATE
 
@@ -74,25 +80,35 @@ def scrape_bouts_from_events(events_df):
                 if len(cells) < 10:
                     continue
 
-                fighters = [f.text.strip() for f in cells[1].select("a.b-link_style_black")]
-                if len(fighters) < 2:
+                # extract urls and fighter full names
+                fighter_links = cells[1].select("a.b-link_style_black")
+                if len(fighter_links) < 2:
                     continue
+
+                fighter_urls = [f.get("href") for f in fighter_links]
+                fighter_names = [f.text.strip() for f in fighter_links]
 
                 # winner detection -> gérer les draw
                 win_tags = cells[0].select("i.b-flag__text")
                 winner = None
+                winner_full_name = None
                 if win_tags:
                     if win_tags[0].text.strip().lower() == "win":
-                        winner = fighters[0]
+                        winner = fighter_urls[0]
+                        winner_full_name = fighter_names[0]
                     elif len(win_tags) > 1 and win_tags[1].text.strip().lower() == "win":
-                        winner = fighters[1]
+                        winner = fighter_urls[1]
+                        winner_full_name = fighter_names[1]
 
                 yield {
                     "event_url": event_url,
                     "bout_url": row.get("data-link"),
-                    "fighter_1": fighters[0],
-                    "fighter_2": fighters[1],
-                    "winner": winner,
+                    "fighter_1_url": fighter_urls[0],
+                    "fighter_2_url": fighter_urls[1],
+                    "fighter_1_full_name": fighter_names[0],
+                    "fighter_2_full_name": fighter_names[1],
+                    "winner_url": winner,
+                    "winner_full_name": winner_full_name,
                     "weight_class": cells[6].text.strip(),
                     "method": " ".join(cells[7].get_text().split()),
                     "round": cells[8].text.strip(),

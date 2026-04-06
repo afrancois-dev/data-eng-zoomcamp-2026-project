@@ -12,12 +12,12 @@ depends:
   - raw.bouts
 
 columns:
-  - name: bout_id
+  - name: bout_sk
     type: STRING
     primary_key: true
     checks:
       - name: not_null
-  - name: event_id
+  - name: event_sk
     type: STRING
     checks:
       - name: not_null
@@ -25,15 +25,21 @@ columns:
     type: DATE
     checks:
       - name: not_null
-  - name: fighter_1_id
+  - name: fighter_1_sk
     type: STRING
     checks:
       - name: not_null
-  - name: fighter_2_id
+  - name: fighter_2_sk
     type: STRING
     checks:
       - name: not_null
-  - name: winner_id
+  - name: fighter_1_full_name
+    type: STRING
+  - name: fighter_2_full_name
+    type: STRING
+  - name: winner_sk
+    type: STRING
+  - name: winner_full_name
     type: STRING
   - name: weight_class
     type: STRING
@@ -47,11 +53,11 @@ columns:
 @bruin */
 
 SELECT
-    {{ generate_surrogate_key(['bout_url']) }} as bout_id,
-    {{ generate_surrogate_key(['event_url']) }} as event_id,
-    {{ generate_surrogate_key(['fighter_1']) }} as fighter_1_id,
-    {{ generate_surrogate_key(['fighter_2']) }} as fighter_2_id,
-    {{ generate_surrogate_key(['winner']) }} as winner_id,
+    {{ generate_surrogate_key(['bout_url']) }} as bout_sk,
+    {{ generate_surrogate_key(['event_url']) }} as event_sk,
+    {{ generate_surrogate_key(['fighter_1_url']) }} as fighter_1_sk,
+    {{ generate_surrogate_key(['fighter_2_url']) }} as fighter_2_sk,
+    {{ generate_surrogate_key(['winner_url']) }} as winner_sk,
     weight_class,
     method,
     time,

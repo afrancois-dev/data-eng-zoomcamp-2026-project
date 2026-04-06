@@ -10,9 +10,9 @@ materialization:
   strategy: time_interval
   partition_by: date
   cluster_by:
-    - event_id
-    - fighter_1_id
-    - fighter_2_id
+    - event_sk
+    - fighter_1_sk
+    - fighter_2_sk
   incremental_key: date
   time_granularity: date
 
@@ -22,18 +22,18 @@ depends:
   - dwh.dim_events
 
 columns:
-  - name: bout_id
+  - name: bout_sk
     type: STRING
     primary_key: true
-  - name: event_id
+  - name: event_sk
     type: STRING
   - name: date
     type: DATE
-  - name: fighter_1_id
+  - name: fighter_1_sk
     type: STRING
-  - name: fighter_2_id
+  - name: fighter_2_sk
     type: STRING
-  - name: winner_id
+  - name: winner_sk
     type: STRING
   - name: weight_class
     type: STRING
@@ -47,11 +47,11 @@ columns:
 @bruin */
 
 SELECT
-    bout_id,
-    event_id,
-    fighter_1_id,
-    fighter_2_id,
-    winner_id,
+    bout_sk,
+    event_sk,
+    fighter_1_sk,
+    fighter_2_sk,
+    winner_sk,
     weight_class,
     method,
     round,
