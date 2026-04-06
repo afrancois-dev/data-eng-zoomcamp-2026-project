@@ -7,7 +7,14 @@ tags:
 
 materialization:
   type: table
-  strategy: create+replace
+  strategy: time_interval
+  partition_by: date
+  cluster_by:
+    - event_id
+    - fighter_1_id
+    - fighter_2_id
+  incremental_key: date
+  time_granularity: date
 
 depends:
   - staging.bouts

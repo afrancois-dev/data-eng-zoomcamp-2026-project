@@ -212,6 +212,7 @@ logs/runs
 logs/*.log
 *.py[cod]
 logs/queries
+duckdb-dev.db
 
 # terragrunt / terraform
 .terragrunt-cache

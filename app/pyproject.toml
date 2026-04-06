@@ -10,6 +10,7 @@ dependencies = [
     "requests>=2.33.0,<3.0.0",
     "beautifulsoup4>=4.14.3,<4.15.0",
     "bruin-sdk[duckdb,bigquery]>=0.5.0,<0.6.0",
+    "google-cloud-bigquery-storage>=2.37.0,<2.38.0",
 ]
 
 [dependency-groups]

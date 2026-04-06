@@ -8,7 +8,7 @@ default_connections:
     duckdb: "db"
 default:
     rerun_cooldown: 300
-    type: bq.sql # or use duckdb.sql for local
+    type: bq.sql # use duckdb.sql for local, bq.sql for staging and production
 
 retries: 1
 
