@@ -44,7 +44,8 @@ resource "google_cloud_run_v2_job" "default" {
       service_account = var.service_account_email
       containers {
         image = var.image_url
-        # Default Bruin command
+        # by default, bruin runs for D-1 if no dates are provided.
+        # i.e daily scheduling at 01:00 UTC to pick up D-1 data.
         args = ["run", ".", "--environment", trimprefix(var.project_id, "mma-stats-"), "--push-metadata"]
 
         resources {

@@ -51,6 +51,7 @@ import random
 from bruin import query
 import logging
 import os
+from datetime import datetime, timezone
 
 # built-in variables
 start_date_env = os.environ.get("BRUIN_START_DATE")
@@ -99,7 +100,7 @@ def scrape_bouts_from_events(events_df):
                     "date": event_date,
                 }
 
-            time.sleep(1 + random.uniform(0, 0.3))
+            time.sleep(1 + random.uniform(0, 0.15))
         except Exception as e:
             logging.error(f"Error scraping event {event_url}: {e}")
 
@@ -110,19 +111,15 @@ def materialize():
         conditions = []
 
         if not full_refresh:
-            if start_date_env:
-                conditions.append(f"date >= '{start_date_env}'")
+            # by default, bruin runs for D-1 if no dates are provided.
+            start_date = start_date_env if not start_date_env else datetime.now(timezone.utc).strftime("%Y-%m-%d")
+            conditions.append(f"date >= '{start_date}'")
+
             if end_date_env:
                 conditions.append(f"date <= '{end_date_env}'")
 
-            if conditions:
-                query_str += f" WHERE {' AND '.join(conditions)}"
-                logging.info(
-                    f"Incremental run: filtering events from {start_date_env or 'beginning'} to {end_date_env or 'now'}."
-                )
-            else:
-                query_str += " ORDER BY date DESC LIMIT 1"
-                logging.info("Incremental run (no dates): scraping the most recent event.")
+            query_str += f" WHERE {' AND '.join(conditions)}"
+            logging.info(f"Incremental run: filtering events from {start_date} to {end_date_env or 'now'}.")
         else:
             logging.info("Full refresh: scraping all historically available events.")
 

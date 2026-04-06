@@ -32,10 +32,15 @@ The project uses DuckDB as a local storage engine for local env. The configurati
 bruin run .
 ```
 
-### Initialize SCD2 (Full Refresh)
+### Initialize SCD2 (full refresh)
 For the first run of the historical fighter dimension:
 ```bash
 bruin run --full-refresh assets/dwh/dim_fighters.sql
+```
+
+### Load data periodically (batch)
+```
+bruin run app/assets/raw/bouts_scraper.py --start-date 2026-03-29T00:00:00.000Z --environment dev
 ```
 
 ## Assets Structure
