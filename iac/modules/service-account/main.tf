@@ -24,7 +24,8 @@ resource "google_service_account" "ui_sa" {
 resource "google_project_iam_member" "ui_sa_roles" {
   for_each = toset([
     "roles/bigquery.jobUser",
-    "roles/bigquery.dataViewer"
+    "roles/bigquery.dataViewer",
+    "roles/bigquery.readSessionUser"
   ])
   project = var.project_id
   role    = each.value

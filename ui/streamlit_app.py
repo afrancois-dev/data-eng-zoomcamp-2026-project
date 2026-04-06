@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import altair as alt
 from google.cloud import bigquery
+from google.oauth2 import service_account
 
 st.set_page_config(
     page_title="MMA fight analytics",
@@ -16,31 +17,14 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# Authentication flow
-if not st.user.is_logged_in:
-    st.markdown("""
-    <div style="text-align: center;">
-        <p>Veuillez vous connecter pour accéder aux analyses.</p>
-    </div>
-    """, unsafe_allow_html=True)
-    st.button("Log in with Google", on_click=st.login, use_container_width=True)
-    st.stop()
-
-# Logout button in the sidebar
-with st.sidebar:
-    st.write(f"Connecté en tant que : **{st.user.name}**")
-    st.button("Log out", on_click=st.logout)
-
 # BigQuery client
 @st.cache_resource
 def get_bq_client():
-    # Streamlit Cloud can use a Service Account JSON key for simplicity
-    if "gcp_service_account" in st.secrets:
-        from google.oauth2 import service_account
-        credentials = service_account.Credentials.from_service_account_info(st.secrets["gcp_service_account"])
-        return bigquery.Client(credentials=credentials, project=credentials.project_id)
-    
-    # Fallback for local dev
+    # streamlit cloud can use a sa json key stored in secrets
+    if getattr(st, "secrets", {}):
+        return bigquery.Client(credentials=service_account.Credentials.from_service_account_info(st.secrets["mma_stats_ui_sa"]))
+
+    # fallback for local dev (using gcloud auth)
     return bigquery.Client()
 
 def run_query(query):
