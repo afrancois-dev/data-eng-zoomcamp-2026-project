@@ -10,9 +10,6 @@ default:
     rerun_cooldown: 300
     type: bq.sql # or use duckdb.sql for local
 
-metadata_push:
-  bigquery: true
-
 retries: 1
 
 # variables:

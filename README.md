@@ -68,7 +68,8 @@ bruin run app --environment staging
 cd iac/staging # or production
 terragrunt run -all apply
 ```
-NB: Cloud scheduler has been added through the GCP UI. It is launched every day (at 01:00 UTC)
+NB: Cloud scheduler has been automated via Terragrunt in the `cloud-run-job` module. It is launched every day (at 01:00 UTC).
+NB 2: Update .bruin.yml project_id with your gcp project_id, and also make sure to modify iac/staging/env.hcl project_id.
 
 
 Cloud Run deployed by terragrunt <br>
