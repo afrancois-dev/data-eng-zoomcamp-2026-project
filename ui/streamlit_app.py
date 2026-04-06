@@ -21,11 +21,15 @@ st.markdown("""
 @st.cache_resource
 def get_bq_client():
     # streamlit cloud can use a sa json key stored in secrets
-    if getattr(st, "secrets", {}):
-        return bigquery.Client(credentials=service_account.Credentials.from_service_account_info(st.secrets["mma_stats_ui_sa"]))
-
-    # fallback for local dev (using gcloud auth)
-    return bigquery.Client()
+    try:
+        return bigquery.Client(
+            credentials=service_account.Credentials.from_service_account_info(
+                st.secrets["mma_stats_ui_sa"]
+            ),
+        )
+    except Exception:
+        # fallback for local dev (using gcloud auth)
+        return bigquery.Client()
 
 def run_query(query):
     client = get_bq_client()
@@ -86,68 +90,79 @@ def get_fighter_list():
 
 fighters_df = get_fighter_list()
 
-# Add all option
-fighter_options = ["All Fighters"] + fighters_df['full_name'].tolist()
+# Add all option with multi-selection
+fighter_options = fighters_df['full_name'].tolist()
 _, search_col, _ = st.columns([1, 2, 1])
 with search_col:
-    selected_fighter_name = st.selectbox("Select a fighter", fighter_options)
+    selected_fighter_names = st.multiselect("Select one or more fighters", fighter_options, placeholder="Type to search...")
 
-if selected_fighter_name != "All Fighters":
-    selected_fighter_id = fighters_df[fighters_df['full_name'] == selected_fighter_name]['fighter_sk'].values[0]
+# Get IDs for selected fighters
+if selected_fighter_names:
+    selected_fighter_ids = fighters_df[fighters_df['full_name'].isin(selected_fighter_names)]['fighter_sk'].tolist()
 else:
-    selected_fighter_id = None
+    selected_fighter_ids = []
 
 @st.cache_data(ttl=3600)
-def get_fighter_details(f_id):
-    if f_id is None:
+def get_fighters_details(f_ids):
+    if not f_ids:
         return pd.DataFrame()
-    return run_query(f"SELECT * FROM `dwh.dim_fighters` WHERE fighter_sk = {f_id} AND _is_current = true")
+    ids_str = ",".join(map(str, f_ids))
+    return run_query(f"SELECT *, CONCAT(first_name, ' ', last_name) as full_name FROM `dwh.dim_fighters` WHERE fighter_sk IN ({ids_str}) AND _is_current = true")
 
-fighter_details = get_fighter_details(selected_fighter_id)
+fighters_details = get_fighters_details(selected_fighter_ids)
 
-if selected_fighter_id and not fighter_details.empty:
-    f = fighter_details.iloc[0]
-    _, c1, c2, c3, _ = st.columns([1, 2, 2, 2, 1])
-    c1.info(f"**Nickname:** {f['nick_name'] or 'N/A'}")
-    c2.info(f"**Height:** {f['height']}")
-    c3.info(f"**Weight:** {f['weight']}")
-    st.markdown(f"<div style='text-align: center;'><strong>Wins recorded:</strong> {f['wins']}</div>", unsafe_allow_html=True)
-elif selected_fighter_name == "All Fighters":
+if selected_fighter_ids and not fighters_details.empty:
+    for _, f in fighters_details.iterrows():
+        with st.expander(f"👤 {f['full_name']}", expanded=True):
+            _, c1, c2, c3, _ = st.columns([1, 2, 2, 2, 1])
+            c1.info(f"**Nickname:** {f['nick_name'] or 'N/A'}")
+            c2.info(f"**Height:** {f['height']}")
+            c3.info(f"**Weight:** {f['weight']}")
+            st.markdown(f"<div style='text-align: center;'><strong>Wins recorded:</strong> {f['wins']}</div>", unsafe_allow_html=True)
+else:
     st.markdown("<div style='text-align: center;'><em>Showing global statistics for all fighters.</em></div>", unsafe_allow_html=True)
 
 # bouts
-if selected_fighter_id:
+if selected_fighter_ids:
     st.markdown("<h3 style='text-align: center;'>Recent bouts</h3>", unsafe_allow_html=True)
 
     @st.cache_data(ttl=3600)
-    def get_recent_bouts(f_id):
+    def get_recent_bouts(f_ids):
+        if not f_ids:
+            return pd.DataFrame()
+        ids_str = ",".join(map(str, f_ids))
         query = f"""
-        SELECT 
-            b.date,
-            e.name as event_name,
-            b.weight_class,
-            b.method,
-            CASE 
-                WHEN b.winner_sk = {f_id} THEN 'WIN' 
-                WHEN b.winner_sk IS NULL THEN 'DRAW/NC'
-                ELSE 'LOSS' 
-            END as result
-        FROM `dwh.fact_bouts` b
-        JOIN `dwh.dim_events` e ON b.event_sk = e.event_sk
-        WHERE b.fighter_1_sk = {f_id} OR b.fighter_2_sk = {f_id}
-        ORDER BY b.date DESC
-        LIMIT 10
+        WITH fighter_bouts AS (
+            SELECT 
+                b.date,
+                e.name as event_name,
+                b.weight_class,
+                b.method,
+                f.fighter_sk,
+                CONCAT(f.first_name, ' ', f.last_name) as fighter,
+                CASE 
+                    WHEN b.winner_sk = f.fighter_sk THEN 'WIN' 
+                    WHEN b.winner_sk IS NULL THEN 'DRAW/NC'
+                    ELSE 'LOSS' 
+                END as result
+            FROM `dwh.fact_bouts` b
+            JOIN `dwh.dim_events` e ON b.event_sk = e.event_sk
+            JOIN `dwh.dim_fighters` f ON (b.fighter_1_sk = f.fighter_sk OR b.fighter_2_sk = f.fighter_sk)
+            WHERE f.fighter_sk IN ({ids_str})
+        )
+        SELECT * FROM fighter_bouts
+        ORDER BY date DESC
+        LIMIT 100
         """
         return run_query(query)
 
-    bouts = get_recent_bouts(selected_fighter_id)
+    bouts = get_recent_bouts(selected_fighter_ids)
     if not bouts.empty:
         st.dataframe(bouts, width="stretch")
         
         # win/loss Chart
-        st.markdown("<h4 style='text-align: center;'>Win/Loss distribution</h4>", unsafe_allow_html=True)
-        res_counts = bouts['result'].value_counts().reset_index()
-        res_counts.columns = ['result', 'count']
+        st.markdown("<h4 style='text-align: center;'>Combined Win/Loss distribution</h4>", unsafe_allow_html=True)
+        res_counts = bouts.groupby(['result']).size().reset_index(name='count')
         
         # Color mapping for results
         color_scale = alt.Scale(
@@ -161,7 +176,7 @@ if selected_fighter_id:
             tooltip=['result', 'count']
         ).properties(height=300)
         
-        st.altair_chart(wl_chart, width="stretch")
+        st.altair_chart(wl_chart, use_container_width=True)
     else:
         st.write("No bouts found.")
 
@@ -171,12 +186,23 @@ st.divider()
 st.markdown("<h2 style='text-align: center;'>Bouts by weight class over time</h2>", unsafe_allow_html=True)
 
 @st.cache_data(ttl=3600)
-def get_global_wc_timeline(f_id=None):
+def get_global_wc_timeline(f_ids=[]):
     where_clause = ""
-    if f_id:
-        where_clause = f"WHERE fighter_1_sk = {f_id} OR fighter_2_sk = {f_id}"
+    fighter_select = ""
+    group_by = "period, weight_class, gender_group"
+    
+    if f_ids:
+        ids_str = ",".join(map(str, f_ids))
+        where_clause = f"""
+            JOIN `dwh.dim_fighters` f ON (b.fighter_1_sk = f.fighter_sk OR b.fighter_2_sk = f.fighter_sk)
+            WHERE f.fighter_sk IN ({ids_str})
+        """
+        fighter_select = "CONCAT(f.first_name, ' ', f.last_name) as fighter_name,"
+        group_by = "fighter_name, " + group_by
+
     return run_query(f"""
         SELECT 
+            {fighter_select}
             DATE_TRUNC(date, QUARTER) as period, 
             weight_class,
             CASE 
@@ -184,13 +210,13 @@ def get_global_wc_timeline(f_id=None):
                 ELSE 'Men'
             END as gender_group,
             COUNT(*) as bout_count 
-        FROM `dwh.fact_bouts` 
+        FROM `dwh.fact_bouts` b
         {where_clause}
-        GROUP BY period, weight_class, gender_group
+        GROUP BY {group_by}
         ORDER BY period
     """)
 
-global_wc_timeline = get_global_wc_timeline(selected_fighter_id)
+global_wc_timeline = get_global_wc_timeline(selected_fighter_ids)
 
 if not global_wc_timeline.empty:
     g_gender_filter = st.radio("Filter by gender group", ["All", "Men", "Women"], horizontal=True, key="global_gender_filter")
@@ -199,15 +225,21 @@ if not global_wc_timeline.empty:
     if g_gender_filter != "All":
         g_plot_df = global_wc_timeline[global_wc_timeline['gender_group'] == g_gender_filter]
 
+    # If fighters are selected, we separate by fighter name
+    color_field = 'fighter_name:N' if selected_fighter_ids else 'weight_class:N'
+    tooltip_list = ['period', 'weight_class', 'gender_group', 'bout_count']
+    if selected_fighter_ids:
+        tooltip_list.insert(0, 'fighter_name')
+
     g_line_chart = alt.Chart(g_plot_df).mark_line(point=True).encode(
         x=alt.X('period:T', title='Quarter'),
         y=alt.Y('bout_count:Q', title='Number of Bouts'),
-        color=alt.Color('weight_class:N', title='Weight class'),
+        color=alt.Color(color_field, title='Split'),
         strokeDash=alt.StrokeDash('gender_group:N', title='Group'),
-        tooltip=['period', 'weight_class', 'gender_group', 'bout_count']
+        tooltip=tooltip_list
     ).properties(height=400).interactive()
     
-    st.altair_chart(g_line_chart, width="stretch")
+    st.altair_chart(g_line_chart, use_container_width=True)
 
 st.divider()
 
@@ -215,30 +247,45 @@ st.divider()
 st.markdown("<h2 style='text-align: center;'>Bouts distribution</h2>", unsafe_allow_html=True)
 
 @st.cache_data(ttl=3600)
-def get_timeline_stats(f_id=None):
+def get_timeline_stats(f_ids=[]):
     where_clause = ""
-    if f_id:
-        where_clause = f"WHERE fighter_1_sk = {f_id} OR fighter_2_sk = {f_id}"
+    fighter_select = ""
+    group_by = "month"
+    if f_ids:
+        ids_str = ",".join(map(str, f_ids))
+        where_clause = f"""
+            JOIN `dwh.dim_fighters` f ON (b.fighter_1_sk = f.fighter_sk OR b.fighter_2_sk = f.fighter_sk)
+            WHERE f.fighter_sk IN ({ids_str})
+        """
+        fighter_select = "CONCAT(f.first_name, ' ', f.last_name) as fighter_name,"
+        group_by = "fighter_name, month"
     return run_query(f"""
         SELECT 
+            {fighter_select}
             DATE_TRUNC(date, MONTH) as month, 
             COUNT(*) as bout_count 
-        FROM `dwh.fact_bouts` 
+        FROM `dwh.fact_bouts` b
         {where_clause}
-        GROUP BY month 
+        GROUP BY {group_by}
         ORDER BY month
     """)
 
-timeline_stats = get_timeline_stats(selected_fighter_id)
+timeline_stats = get_timeline_stats(selected_fighter_ids)
 
 # Histogram (bar chart)
-hist_chart = alt.Chart(timeline_stats).mark_bar(color='#FF4B4B').encode(
+color_enc = alt.Color('fighter_name:N') if selected_fighter_ids else alt.value('#FF4B4B')
+tooltip_list = ['month', 'bout_count']
+if selected_fighter_ids:
+    tooltip_list.insert(0, 'fighter_name')
+
+hist_chart = alt.Chart(timeline_stats).mark_bar().encode(
     x=alt.X('month:T', title='Month'),
     y=alt.Y('bout_count:Q', title='Number of Bouts'),
-    tooltip=['month', 'bout_count']
+    color=color_enc,
+    tooltip=tooltip_list
 ).properties(height=300)
 
-st.altair_chart(hist_chart, width="stretch")
+st.altair_chart(hist_chart, use_container_width=True)
 
 st.divider()
 
@@ -246,17 +293,41 @@ st.divider()
 st.markdown("<h2 style='text-align: center;'>Weight class distribution</h2>", unsafe_allow_html=True)
 
 @st.cache_data(ttl=3600)
-def get_wc_stats(f_id=None):
+def get_wc_stats(f_ids=[]):
     where_clause = ""
-    if f_id:
-        where_clause = f"WHERE fighter_1_sk = {f_id} OR fighter_2_sk = {f_id}"
-    return run_query(f"SELECT weight_class, COUNT(*) as bout_count FROM `dwh.fact_bouts` {where_clause} GROUP BY weight_class ORDER BY bout_count DESC")
+    fighter_select = ""
+    group_by = "weight_class"
+    if f_ids:
+        ids_str = ",".join(map(str, f_ids))
+        where_clause = f"""
+            JOIN `dwh.dim_fighters` f ON (b.fighter_1_sk = f.fighter_sk OR b.fighter_2_sk = f.fighter_sk)
+            WHERE f.fighter_sk IN ({ids_str})
+        """
+        fighter_select = "CONCAT(f.first_name, ' ', f.last_name) as fighter_name,"
+        group_by = "fighter_name, weight_class"
+    return run_query(f"""
+        SELECT 
+            {fighter_select}
+            weight_class, 
+            COUNT(*) as bout_count 
+        FROM `dwh.fact_bouts` b
+        {where_clause}
+        GROUP BY {group_by}
+        ORDER BY bout_count DESC
+    """)
 
-wc_stats = get_wc_stats(selected_fighter_id)
+wc_stats = get_wc_stats(selected_fighter_ids)
+
+color_enc = alt.Color('fighter_name:N') if selected_fighter_ids else alt.Color('weight_class:N')
+x_offset = alt.XOffset('fighter_name:N') if selected_fighter_ids else alt.value(0)
+
 chart = alt.Chart(wc_stats).mark_bar().encode(
-    x=alt.X('bout_count:Q'),
     y=alt.Y('weight_class:N', sort='-x'),
-    color='weight_class:N'
-)
-st.altair_chart(chart, width="stretch")
+    x=alt.X('bout_count:Q'),
+    color=color_enc,
+    xOffset=x_offset,
+    tooltip=['weight_class', 'bout_count'] + (['fighter_name'] if selected_fighter_ids else [])
+).properties(height=alt.Step(20) if not selected_fighter_ids else 400)
+
+st.altair_chart(chart, use_container_width=True)
 
