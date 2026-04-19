@@ -18,7 +18,7 @@ Final project for the **Data Engineering Zoomcamp 2026**. This platform automate
 > *FYI: fight predictions will be included in a future iteration of the project using Gemini and function calling.*
 
 <p align="center">
-  <img width="1601" height="696" alt="mma-stats" src="https://github.com/user-attachments/assets/5e50cef2-c814-4100-87db-0821d5634bf5" />
+  <img width="1601" height="696" alt="mma-stats (2)" src="https://github.com/user-attachments/assets/60f50174-3b24-4d82-a305-18e1650d105c" />
 </p>
 
 ## Problem description
