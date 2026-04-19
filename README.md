@@ -17,7 +17,9 @@ Final project for the **Data Engineering Zoomcamp 2026**. This platform automate
 
 > *FYI: fight predictions will be included in a future iteration of the project using Gemini and function calling.*
 
-<img width="2032" height="769" alt="mma-stats drawio" src="https://github.com/user-attachments/assets/674fddb7-02eb-446d-a5c2-47458092a082" />
+<p align="center">
+  <img width="2032" height="769" alt="mma-stats drawio" src="https://github.com/user-attachments/assets/674fddb7-02eb-446d-a5c2-47458092a082" />
+</p>
 
 ## Problem description
 Combat sports analysis, specifically for the UFC, often suffers from a lack of structured and accessible data for temporal analysis. This project solves this problem by:
@@ -34,7 +36,9 @@ Bruin automatically manage all the pipeline within the project:
 - **staging/ layer**: SQL transformations clean, cast, and deduplicate raw data while generating identifiers. `staging.bouts` depends on `raw.bouts`.
 - **DWH layer (i.e core)**: dimensional models consolidate data for analysis. The `fact_bouts` table depends on `staging.bouts`, `dim_fighters`, and `dim_events` to ensure referential integrity.
 
-<img width="1268" height="455" alt="Screenshot 2026-04-19 at 19 17 21" src="https://github.com/user-attachments/assets/f7be7d92-af3b-447d-8418-8a0bb43b98c0" />
+<p align="center">
+  <img width="1268" height="455" alt="Screenshot 2026-04-19 at 19 17 21" src="https://github.com/user-attachments/assets/f7be7d92-af3b-447d-8418-8a0bb43b98c0" />
+</p>
 
 
 ### Modeling choices
@@ -123,7 +127,9 @@ An interactive interface to explore data. Generate a JSON key for your service a
 The dashboard contains multiple analysis tiles (KO trends, performance by weight class, finish rates, etc.).
 - [Link to Looker report](https://lookerstudio.google.com/reporting/4de86c35-f0fb-4b7c-9875-e29bf6c66181)
 
-<img width="1214" height="770" alt="UFC Dashboard" src="https://github.com/user-attachments/assets/129c9be2-5894-4cad-9f08-0def727a8bc2" />
+<p align="center">
+  <img width="1214" height="770" alt="UFC Dashboard" src="https://github.com/user-attachments/assets/129c9be2-5894-4cad-9f08-0def727a8bc2" />
+</p>
 
 ## Suggestions
 - [ ] Slack webhook alerts for pipeline failures.
