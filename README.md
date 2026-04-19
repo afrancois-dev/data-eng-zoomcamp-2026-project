@@ -13,7 +13,9 @@
 [![Scheduler: Cloud Scheduler](https://img.shields.io/badge/Scheduler-Cloud_Scheduler-4285F4?logo=google-cloud&logoColor=white)](https://cloud.google.com/scheduler)
 [![Project: DE Zoomcamp](https://img.shields.io/badge/Project-DE%20Zoomcamp%202026-blue)](https://github.com/DataTalksClub/data-engineering-zoomcamp)
 
-Final project for the **Data Engineering Zoomcamp 2026**. This platform automates the ingestion, transformation, and analysis of UFC statistics to provide performance indicators and fight predictions based on historical data (next step by using Gemini).
+Final project for the **Data Engineering Zoomcamp 2026**. This platform automates the ingestion, transformation, and analysis of UFC statistics to provide performance indicators and fight predictions based on historical data.
+
+> *FYI: fight predictions will be included in a future iteration of the project using Gemini and function calling.
 
 ## Problem description
 Combat sports analysis, specifically for the UFC, often suffers from a lack of structured and accessible data for temporal analysis. This project solves this problem by:
@@ -21,11 +23,21 @@ Combat sports analysis, specifically for the UFC, often suffers from a lack of s
 - **modeling** fighter state changes (weight, rankings, record) via an SCD Type 2 approach to allow for accurate retrospective analysis.
 - **automating** the end-to-end pipeline to offer decision-making dashboards for comparing fighting styles and predicting potential outcomes based on striking and grappling metrics.
 
-## Architecture
-The architecture follows a **medallion-inspired lakehouse** pattern:
-- **raw layer**: raw data scraped via Python and injected directly into BigQuery (incremental mode).
-- **staging layer**: cleaning, deduplication, and type casting via Bruin SQL.
-- **core layer (DWH)**: dimensional modeling (fact/dim) with history management (SCD2).
+## Architecture and data modeling
+The project follows a **medallion-inspired lakehouse** pattern, managing the lineage and data flow through three distinct layers:
+
+### Data lineage
+Bruin automatically manage all the pipeline within the project:
+- **raw/ layer**: python-based scrapers extract data directly from web sources into BigQuery tables (e.g., `raw.bouts`).
+- **staging/ layer**: SQL transformations clean, cast, and deduplicate raw data while generating identifiers. `staging.bouts` depends on `raw.bouts`.
+- **DWH layer (i.e core)**: dimensional models consolidate data for analysis. The `fact_bouts` table depends on `staging.bouts`, `dim_fighters`, and `dim_events` to ensure referential integrity.
+
+### Modeling choices
+The data warehouse uses a **star schema** optimized for BigQuery:
+- **surrogate keys**: persistent identifiers are generated via a custom macro (using immutable source urls). This ensures stable joins across the pipeline. Most of the time, there were no suitable candidates to create a proper stable surrogate key; therefore, I used the URL as the SK. Additionally, I used `farm_fingerprint`, which is better as it returns a BIGINT instead of a hash.
+- **SCD type 2**: All dimensions (`dim_fighters`, `dim_events`) implement **slowly changing dimension type 2** via Bruin's `scd2_by_column` strategy. This allows for point-in-time analysis (e.g., a fighter's weight class at the time of a specific historic fight). For `dim_fighters`, I would have loved to use a surrogate key based on (firstname, lastname); however, female fighters might change their last name when married, and duplicates are possible. Moreover, if I had fetched the fighter's birthday, it could have been a suitable SK.
+- **fact table optimization**: The `fact_bouts` table is **partitioned by `date`** to reduce scan costs and **clustered by `event_sk` and `fighter_sk`** to accelerate common joins in downstream dashboards (even though the dataset is currently small, as I plan to add data from other providers, it is important to implement best practices for large-scale data to minimize technical debt).
+- **incremental strategy**: All transformations use an incremental `time_interval` approach, processing only new data daily to minimize compute consumption. Additionally, in case a fighter fails a doping test and the bout's outcome changes (e.g., from a win to a no contest), we can simply re-fetch the data.
 
 ## Tech stack
 - **Orchestration**: [Bruin](https://getbruin.com) (SQL & Python assets) with cloud Scheduler & cloud Run.
@@ -34,7 +46,7 @@ The architecture follows a **medallion-inspired lakehouse** pattern:
 - **environments**: - local (DuckDB)
                     - staging (GCP)
                     - production (GCP)
-- **security**: github workload identity federation (wif) for keyless authentication. Nowadays, it is too dangerous to generate a service account trough .json file.
+- **security**: github workload identity federation (wif) for keyless authentication. Nowadays, it is too dangerous to generate a service account through a .json file.
 
 ## Quick start
 
@@ -45,14 +57,13 @@ curl -LsSf https://getbruin.com/install/cli | sh
 uv sync --dev
 ```
 
-Install pre-commit (to get a production ready coding experience):
+Install pre-commit (to get a production-ready coding experience):
 ```bash
 uv --directory app run prek install
 ```
 
-Each time, you commit you will have this for instance
+Each time you commit, you will see this, for instance:
 ```
-(ui) @afrancois-dev ➜ /workspaces/data-eng-zoomcamp-2026-project (staging) $ git commit -m "chore(README): update REAMDE.md"
 Ruff Format..........................................(no files to check)Skipped
 Ruff Lint............................................(no files to check)Skipped
 Bruin Format sql files & asset definitions...............................Passed
@@ -82,7 +93,7 @@ bruin run app --environment staging
 Infrastructure is fully automated via Terragrunt
 ```bash
 cd iac/staging # or production
-terragrunt run -all apply
+terragrunt run-all apply
 ```
 *Note: Make sure to update the `project_id` in `.bruin.yml` and `iac/*/env.hcl`.*
 
@@ -95,17 +106,10 @@ The project uses **Workload identity federation**. Configure your github environ
 
 The [`.github/workflows/ci.yml`](.github/workflows/ci.yml) workflow automatically handles docker builds, pushing to artifact registry, and deploying to cloud Run.
 
-## Data modeling and optimization (DWH)
-The Data Warehouse is optimized for performance and cost:
-- **dim_fighters**: Fighter dimension with history management (**SCD2**) using Bruin's `scd2_by_column` strategy.
-- **dim_events**: Event dimension (SCD2).
-- **fact_bouts**: Fact table containing bout results.
-  - **Partitioning**: By day (`date`) to limit data scan for temporal queries.
-  - **Clustering**: By `event_sk`, `fighter_1_sk`, `fighter_2_sk` to accelerate common joins and filters.
-
 ## Visualization
 ### Streamlit UI
-An interactive interface to explore predictions. Generate a JSON key for your service account and use it through Streamlit Cloud.
+An interactive interface to explore data. Generate a JSON key for your service account and use it through Streamlit Cloud, otherwise; use the link below.
+- https://mma-stats.streamlit.app/
 
 ### Looker Studio
 The dashboard contains multiple analysis tiles (KO trends, performance by weight class, finish rates, etc.).
