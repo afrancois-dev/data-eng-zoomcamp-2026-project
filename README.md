@@ -100,7 +100,10 @@ Infrastructure is fully automated via Terragrunt
 cd iac/staging # or production
 terragrunt run-all apply
 ```
-*Note: Make sure to update the `project_id` in `.bruin.yml` and `iac/*/env.hcl`.*
+*NB 1: Make sure to update the `project_id` in `.bruin.yml` and `iac/*/env.hcl`.*
+*NB 2: Make sure to activate all gcp services before running terragrunt `gcloud services enable ...`*
+
+
 
 ### CI/CD Configuration (github actions)
 The project uses **Workload identity federation**. Configure your github environments with:

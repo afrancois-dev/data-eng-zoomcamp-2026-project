@@ -11,6 +11,6 @@ inputs = {
   pool_display_name     = "GitHub Workload Identity Pool"
   provider_id           = "github-provider"
   provider_display_name = "GitHub Provider"
-  repository_name       = "afrancois-dev/data-eng-zoomcamp-2026-project"
+  repository_name       = "afrancois-dev/mma-stats"
   service_account_id    = dependency.service_account.outputs.mma_stats_sa_name
 }
