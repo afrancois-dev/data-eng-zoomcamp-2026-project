@@ -12,7 +12,7 @@ st.set_page_config(
 
 st.markdown("""
 <div style="text-align: center;">
-    <h1>MMA Fight Analytics 🥊</h1>
+    <h1>MMA fight analytics 🥊</h1>
     <p>Explore UFC results and fighter statistics since 1994.</p>
 </div>
 """, unsafe_allow_html=True)
@@ -53,7 +53,7 @@ try:
     with col1:
         st.metric("Fighters 🥋", summary['total_fighters'][0])
     with col2:
-        st.metric("Total Bouts ⚔️", summary['total_bouts'][0])
+        st.metric("Total bouts ⚔️", summary['total_bouts'][0])
     with col3:
         st.metric("Events 🏟️", summary['total_events'][0])
 
@@ -182,14 +182,14 @@ if selected_fighter_ids:
 
 st.divider()
 
-# Bouts by weight class over time
-st.markdown("<h2 style='text-align: center;'>Bouts by weight class over time</h2>", unsafe_allow_html=True)
+# Bouts over time
+st.markdown("<h2 style='text-align: center;'>Bouts over time</h2>", unsafe_allow_html=True)
 
 @st.cache_data(ttl=3600)
-def get_global_wc_timeline(f_ids=[]):
+def get_global_bouts_timeline(f_ids=[]):
     where_clause = ""
     fighter_select = ""
-    group_by = "period, weight_class, gender_group"
+    group_by = "period, weight_class, gender_group, method"
     
     if f_ids:
         ids_str = ",".join(map(str, f_ids))
@@ -205,6 +205,7 @@ def get_global_wc_timeline(f_ids=[]):
             {fighter_select}
             DATE_TRUNC(date, QUARTER) as period, 
             weight_class,
+            method,
             CASE 
                 WHEN LOWER(weight_class) LIKE '%women%' THEN 'Women'
                 ELSE 'Men'
@@ -216,30 +217,65 @@ def get_global_wc_timeline(f_ids=[]):
         ORDER BY period
     """)
 
-global_wc_timeline = get_global_wc_timeline(selected_fighter_ids)
+global_bouts_timeline = get_global_bouts_timeline(selected_fighter_ids)
 
-if not global_wc_timeline.empty:
-    g_gender_filter = st.radio("Filter by gender group", ["All", "Men", "Women"], horizontal=True, key="global_gender_filter")
+if not global_bouts_timeline.empty:
+    tab1, tab2 = st.tabs(["By weight class", "By method"])
     
-    g_plot_df = global_wc_timeline
-    if g_gender_filter != "All":
-        g_plot_df = global_wc_timeline[global_wc_timeline['gender_group'] == g_gender_filter]
+    with tab1:
+        g_gender_filter = st.radio("Filter by gender group", ["All", "Men", "Women"], horizontal=True, key="wc_gender_filter")
+        
+        g_plot_df = global_bouts_timeline
+        if g_gender_filter != "All":
+            g_plot_df = global_bouts_timeline[global_bouts_timeline['gender_group'] == g_gender_filter]
 
-    # If fighters are selected, we separate by fighter name
-    color_field = 'fighter_name:N' if selected_fighter_ids else 'weight_class:N'
-    tooltip_list = ['period', 'weight_class', 'gender_group', 'bout_count']
-    if selected_fighter_ids:
-        tooltip_list.insert(0, 'fighter_name')
+        # If fighters are selected, we separate by fighter name
+        color_field = 'fighter_name:N' if selected_fighter_ids else 'weight_class:N'
+        tooltip_list = ['period', 'weight_class', 'gender_group', 'bout_count']
+        if selected_fighter_ids:
+            tooltip_list.insert(0, 'fighter_name')
 
-    g_line_chart = alt.Chart(g_plot_df).mark_line(point=True).encode(
-        x=alt.X('period:T', title='Quarter'),
-        y=alt.Y('bout_count:Q', title='Number of Bouts'),
-        color=alt.Color(color_field, title='Split'),
-        strokeDash=alt.StrokeDash('gender_group:N', title='Group'),
-        tooltip=tooltip_list
-    ).properties(height=400).interactive()
-    
-    st.altair_chart(g_line_chart, use_container_width=True)
+        g_line_chart = alt.Chart(g_plot_df).mark_line(point=True).encode(
+            x=alt.X('period:T', title='Quarter'),
+            y=alt.Y('sum(bout_count):Q', title='Number of Bouts'),
+            color=alt.Color(color_field, title='Split', legend=alt.Legend(
+                columns=2,
+                symbolLimit=50,
+                labelFontSize=10,
+                titleFontSize=12
+            )),
+            strokeDash=alt.StrokeDash('gender_group:N', title='Group'),
+            tooltip=tooltip_list
+        ).properties(height=500).interactive()
+        
+        st.altair_chart(g_line_chart, use_container_width=True)
+
+    with tab2:
+        m_gender_filter = st.radio("Filter by gender group", ["All", "Men", "Women"], horizontal=True, key="method_gender_filter")
+        
+        m_plot_df = global_bouts_timeline
+        if m_gender_filter != "All":
+            m_plot_df = global_bouts_timeline[global_bouts_timeline['gender_group'] == m_gender_filter]
+
+        # Color by method or fighter
+        m_color_field = 'fighter_name:N' if selected_fighter_ids else 'method:N'
+        m_tooltip_list = ['period', 'method', 'bout_count']
+        if selected_fighter_ids:
+            m_tooltip_list.insert(0, 'fighter_name')
+
+        m_bar_chart = alt.Chart(m_plot_df).mark_bar().encode(
+            x=alt.X('period:T', title='Quarter'),
+            y=alt.Y('sum(bout_count):Q', title='Number of Bouts'),
+            color=alt.Color(m_color_field, title='Split', legend=alt.Legend(
+                columns=2,
+                symbolLimit=50,
+                labelFontSize=10,
+                titleFontSize=12
+            )),
+            tooltip=m_tooltip_list
+        ).properties(height=500).interactive()
+        
+        st.altair_chart(m_bar_chart, use_container_width=True)
 
 st.divider()
 

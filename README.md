@@ -13,22 +13,30 @@
 [![Scheduler: Cloud Scheduler](https://img.shields.io/badge/Scheduler-Cloud_Scheduler-4285F4?logo=google-cloud&logoColor=white)](https://cloud.google.com/scheduler)
 [![Project: DE Zoomcamp](https://img.shields.io/badge/Project-DE%20Zoomcamp%202026-blue)](https://github.com/DataTalksClub/data-engineering-zoomcamp)
 
-Final project for the **Data Engineering Zoomcamp 2026**. This platform ingests, transforms, and analyzes UFC statistics to provide insights and fight predictions.
+Final project for the **Data Engineering Zoomcamp 2026**. This platform automates the ingestion, transformation, and analysis of UFC statistics to provide performance indicators and fight predictions based on historical data (next step by using Gemini).
 
-## 🏗 Architecture
+## Problem description
+Combat sports analysis, specifically for the UFC, often suffers from a lack of structured and accessible data for temporal analysis. This project solves this problem by:
+- **centralizing** scattered UFC data (fighters, events, bout results) into a modern data warehouse.
+- **modeling** fighter state changes (weight, rankings, record) via an SCD Type 2 approach to allow for accurate retrospective analysis.
+- **automating** the end-to-end pipeline to offer decision-making dashboards for comparing fighting styles and predicting potential outcomes based on striking and grappling metrics.
+
+## Architecture
 The architecture follows a **medallion-inspired lakehouse** pattern:
-- **raw layer**: scraped data ingested directly into BigQuery.
-- **staging layer**: cleaning, deduplication, and type casting via Bruin.
-- **core layer (DWH)**: dimension and fact modeling (`dim_fighters`, `dim_events`, `fact_bouts`).
+- **raw layer**: raw data scraped via Python and injected directly into BigQuery (incremental mode).
+- **staging layer**: cleaning, deduplication, and type casting via Bruin SQL.
+- **core layer (DWH)**: dimensional modeling (fact/dim) with history management (SCD2).
 
-## 🛠 Stack
-- **Orchestration**: [Bruin](https://getbruin.com) (SQL & Python assets) with Cloud Scheduler & Cloud Run
-- **Data Warehouse**: BigQuery & DuckDB (local dev).
-- **Infrastructure**: Terraform & Terragrunt.
-- **Environments**: local, staging, production.
-- **Security**: GitHub workload identity federation (keyless auth).
+## Tech stack
+- **Orchestration**: [Bruin](https://getbruin.com) (SQL & Python assets) with cloud Scheduler & cloud Run.
+- **data warehouse**: BigQuery (storage & compute) as the cost is the same as buckets.
+- **infrastructure**: Terraform & Terragrunt for multi-environment management.
+- **environments**: - local (DuckDB)
+                    - staging (GCP)
+                    - production (GCP)
+- **security**: github workload identity federation (wif) for keyless authentication. Nowadays, it is too dangerous to generate a service account trough .json file.
 
-## 🚀 Quick start
+## Quick start
 
 ### 1. Prerequisites
 ```bash
@@ -37,72 +45,75 @@ curl -LsSf https://getbruin.com/install/cli | sh
 uv sync --dev
 ```
 
-install pre-commit
-```
+Install pre-commit (to get a production ready coding experience):
+```bash
 uv --directory app run prek install
+```
+
+Each time, you commit you will have this for instance
+```
+(ui) @afrancois-dev ➜ /workspaces/data-eng-zoomcamp-2026-project (staging) $ git commit -m "chore(README): update REAMDE.md"
+Ruff Format..........................................(no files to check)Skipped
+Ruff Lint............................................(no files to check)Skipped
+Bruin Format sql files & asset definitions...............................Passed
+Bruin Validate...........................................................Passed
+Terragrunt Format........................................................Passed
 ```
 
 ### 2. Development workflow
 ```bash
-# source env
-source .venv/bin/activate (within app/)
+# Source environment (within app/)
+source .venv/bin/activate
 
-# validate the pipeline
+# Validate the pipeline
 bruin validate app/
 
-# formatting
+# Formatting
 uv run ruff format
 bruin format app/ --sqlfluff
 
-# local execution (DuckDB) - deprecated because duckdb SQL is different from BigQuery
-bruin run app --full-refresh
-
-# staging execution
+# Staging execution
 bruin run app --environment staging
 ```
 
-## 🌍 Infrastructure & deployment
+## Infrastructure and deployment
 
-### Deployment with Terragrunt
+### Deployment with Terragrunt (i.e a terraform wrapper)
+Infrastructure is fully automated via Terragrunt
 ```bash
 cd iac/staging # or production
 terragrunt run -all apply
 ```
-NB: Cloud scheduler has been automated via Terragrunt in the `cloud-run-job` module. It is launched every day (at 01:00 UTC).
-NB 2: Update .bruin.yml project_id with your gcp project_id, and also make sure to modify iac/staging/env.hcl project_id.
+*Note: Make sure to update the `project_id` in `.bruin.yml` and `iac/*/env.hcl`.*
 
+### CI/CD Configuration (github actions)
+The project uses **Workload identity federation**. Configure your github environments with:
+- 2 environments (staging & production)
+- required secrets:
+  - `GCP_WID_PROVIDER`: WID provider identifier.
+  - `GCP_SA_EMAIL`: Terraform service account email.
 
-Cloud Run deployed by terragrunt <br>
-<img width="600" height="300" alt="Screenshot 2026-03-30 at 23 16 14" src="https://github.com/user-attachments/assets/237b5146-1855-4af7-9dc7-ea29dc9c510c" />
+The [`.github/workflows/ci.yml`](.github/workflows/ci.yml) workflow automatically handles docker builds, pushing to artifact registry, and deploying to cloud Run.
 
-Cloud Scheduler (added manually -> btwn I am going to add it later to terragrunt. I was running out of time 😅)
-<img width="600" height="230" alt="Screenshot 2026-03-30 at 23 23 46" src="https://github.com/user-attachments/assets/9a4d2cc8-4114-4c8f-8862-fc75cec1de2b" />
+## Data modeling and optimization (DWH)
+The Data Warehouse is optimized for performance and cost:
+- **dim_fighters**: Fighter dimension with history management (**SCD2**) using Bruin's `scd2_by_column` strategy.
+- **dim_events**: Event dimension (SCD2).
+- **fact_bouts**: Fact table containing bout results.
+  - **Partitioning**: By day (`date`) to limit data scan for temporal queries.
+  - **Clustering**: By `event_sk`, `fighter_1_sk`, `fighter_2_sk` to accelerate common joins and filters.
 
+## Visualization
+### Streamlit UI
+An interactive interface to explore predictions. Generate a JSON key for your service account and use it through Streamlit Cloud.
 
+### Looker Studio
+The dashboard contains multiple analysis tiles (KO trends, performance by weight class, finish rates, etc.).
+- [Link to Looker report](https://lookerstudio.google.com/reporting/4de86c35-f0fb-4b7c-9875-e29bf6c66181)
 
-### CI/CD Configuration (GitHub Actions)
-The project uses **Workload Identity Federation**. Configure your GitHub environments with:
-- 2 github environments (staging & production)
-  - with two secrets
-    - `GCP_WID_PROVIDER`
-    - `GCP_SA_EMAIL`
+<img width="1214" height="770" alt="UFC Dashboard" src="https://github.com/user-attachments/assets/129c9be2-5894-4cad-9f08-0def727a8bc2" />
 
-## 📊 Data modeling
-- **dim_fighters**: fighters (scd2)
-- **dim_events**: events (scd2)
-- **fact_bouts**: bouts containing (fact)
-<img width="593" height="324" alt="Screenshot 2026-03-30 at 23 15 22" src="https://github.com/user-attachments/assets/bc2bb435-a0e7-433e-9a36-e57d917e1d94" />
-
-
-## Viz - Looker
-- https://lookerstudio.google.com/reporting/4de86c35-f0fb-4b7c-9875-e29bf6c66181
-<img width="1214" height="770" alt="Screenshot 2026-03-30 at 22 54 44" src="https://github.com/user-attachments/assets/129c9be2-5894-4cad-9f08-0def727a8bc2" />
-
-## UI - Streamlit
-- generate a json key for your service account, and use it through streamlit cloud
-
-## 📝 Suggestions
-- [ ] Streamlit dashboard for stats visualization.
+## Suggestions
 - [ ] Slack webhook alerts for pipeline failures.
-- [ ] Support for other organizations (hexagonemma, ares, pfl, ksw, Bellator). e.g inside raw/providers -> ares/ 
-- [ ] Gemini integration for predictive analysis.
+- [ ] Support for other organizations (hexagonemma, ares, pfl, ksw, Bellator). e.g inside raw/providers -> ares/ , ...
+- [ ] Gemini integration for advanced predictive analysis.
