@@ -15,7 +15,9 @@
 
 Final project for the **Data Engineering Zoomcamp 2026**. This platform automates the ingestion, transformation, and analysis of UFC statistics to provide performance indicators and fight predictions based on historical data.
 
-> *FYI: fight predictions will be included in a future iteration of the project using Gemini and function calling.
+> *FYI: fight predictions will be included in a future iteration of the project using Gemini and function calling.*
+
+<img width="2032" height="769" alt="mma-stats drawio" src="https://github.com/user-attachments/assets/674fddb7-02eb-446d-a5c2-47458092a082" />
 
 ## Problem description
 Combat sports analysis, specifically for the UFC, often suffers from a lack of structured and accessible data for temporal analysis. This project solves this problem by:
@@ -31,6 +33,9 @@ Bruin automatically manage all the pipeline within the project:
 - **raw/ layer**: python-based scrapers extract data directly from web sources into BigQuery tables (e.g., `raw.bouts`).
 - **staging/ layer**: SQL transformations clean, cast, and deduplicate raw data while generating identifiers. `staging.bouts` depends on `raw.bouts`.
 - **DWH layer (i.e core)**: dimensional models consolidate data for analysis. The `fact_bouts` table depends on `staging.bouts`, `dim_fighters`, and `dim_events` to ensure referential integrity.
+
+<img width="1268" height="455" alt="Screenshot 2026-04-19 at 19 17 21" src="https://github.com/user-attachments/assets/f7be7d92-af3b-447d-8418-8a0bb43b98c0" />
+
 
 ### Modeling choices
 The data warehouse uses a **star schema** optimized for BigQuery:
