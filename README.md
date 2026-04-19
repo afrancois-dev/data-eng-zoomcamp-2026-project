@@ -123,6 +123,10 @@ The [`.github/workflows/ci.yml`](.github/workflows/ci.yml) workflow automaticall
 An interactive interface to explore data. Generate a JSON key for your service account and use it through Streamlit Cloud, otherwise; use the link below.
 - https://mma-stats.streamlit.app/
 
+<p align="center">
+  <img width="1482" height="828" alt="Screenshot 2026-04-19 at 18 30 25" src="https://github.com/user-attachments/assets/1feb4db2-be8d-4d58-9036-4cbe5086210f" />
+</p>
+
 ### Looker Studio
 The dashboard contains multiple analysis tiles (KO trends, performance by weight class, finish rates, etc.).
 - [Link to Looker report](https://lookerstudio.google.com/reporting/4de86c35-f0fb-4b7c-9875-e29bf6c66181)
